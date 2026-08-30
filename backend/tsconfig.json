@@ -7,10 +7,13 @@
     "outDir": "./dist",
 
     "strict": true,
+    "allowJs": true,
+    "checkJs": false,
+
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*"],
   "exclude": ["node_modules", "dist"]
 }
