@@ -30,7 +30,8 @@ export default function PartnerLogin() {
       role: "partner",
     });
 
-    window.location.href = "/partner/dashboard";
+    window.location.href = "/partner/opportunities";
+    
   }
 
   return (
