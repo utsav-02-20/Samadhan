@@ -1,6 +1,17 @@
 /**
+ * ============================================================================
  * File: server.js
- * Entry point - loads env, connects MongoDB, starts Express server
+ * Module: Server
+ * ============================================================================
+ *
+ * Purpose:
+ * Entry point of the Samadhan backend server.
+ *
+ * Functionality:
+ * - Loads environment variables.
+ * - Connects to MongoDB.
+ * - Starts the Express server on the configured port.
+ * ============================================================================
  */
 
 import dotenv from "dotenv";
@@ -12,23 +23,25 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
-async function startServer() {
+const startServer = async () => {
   try {
+    // Connect MongoDB
     if (!MONGO_URI) {
-      console.warn("MONGO_URI not found in .env - starting server without DB");
-    } else {
-      await mongoose.connect(MONGO_URI);
-      console.log("MongoDB connected");
+      throw new Error("MongoDB connection string is missing in .env");
     }
 
+    await mongoose.connect(MONGO_URI);
+    console.log("MongoDB Connected Successfully");
+
+    // Start Express server
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
 
-  } catch (err) {
-    console.error("Failed to start server:", err);
+  } catch (error) {
+    console.error("Server Startup Failed:", error.message);
     process.exit(1);
   }
-}
+};
 
 startServer();
