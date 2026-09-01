@@ -1,9 +1,8 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "tsx watch ./src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
   },
   "dependencies": {
     "@clerk/express": "^2.1.64",
@@ -23,16 +22,6 @@
     "zod": "^4.5.2"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/morgan": "^1.9.10",
-    "@types/multer": "^2.2.0",
-    "@types/node": "^26.4.0",
-    "concurrently": "^10.0.5",
-    "nodemon": "^3.1.14",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.23.12",
-    "typescript": "^5.9.2"
+    "nodemon": "^3.1.14"
   }
 }
