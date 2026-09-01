@@ -1,4 +1,6 @@
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+
 
 export const metadata = {
   title: "Samadhan",
@@ -7,8 +9,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className="min-h-screen bg-[#f8fafc] text-slate-950 antialiased">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

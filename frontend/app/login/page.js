@@ -16,7 +16,8 @@ const roles = [
     title: "Citizen",
     description:
       "Raise civic challenges, follow submissions and stay connected with their progress.",
-    href: "/login/citizen",
+    // href: "/login/citizen",
+    href:`/citizen/auth/sign-in`,
     icon: Users,
     accent: "bg-blue-50 text-blue-600",
     hover: "group-hover:bg-blue-600",
