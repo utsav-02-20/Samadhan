@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * File: citizen.model.ts
+ * File: citizen.model.js
  * Module: Citizens
  * ============================================================================
  *
@@ -14,7 +14,64 @@
  * - Automatically maintains createdAt and updatedAt timestamps.
  *
  * Used By:
- * - citizen.service.ts (register and fetch citizens)
- * - problem.model.ts (references citizenId for complaints)
+ * - citizen.service.js (register and fetch citizens)
+ * - problem.model.js (references citizenId for complaints)
  * ============================================================================
  */
+
+import mongoose from "mongoose";
+
+const citizenSchema = new mongoose.Schema(
+    {
+        clerkId: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true,
+            trim: true,
+        },
+
+        fullName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+        },
+
+        phone: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        district: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        phone: {
+            type: String,
+            default: "",
+        },
+
+        profileComplete: {
+            type: Boolean,
+            default: false,
+        },
+    },
+    {
+        timestamps: true,
+        versionKey: false,
+    }
+);
+
+const Citizen = mongoose.model("Citizen", citizenSchema);
+
+export default Citizen;
