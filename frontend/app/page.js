@@ -104,13 +104,20 @@ export default function HomePage() {
             >
               Ecosystem
             </a>
+
+            <Link
+              href="/login"
+              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+            >
+              Signup
+            </Link>
           </nav>
 
           <Link
             href="/login"
             className="rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold !text-white shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-800"
           >
-            Sign in
+            Get started
           </Link>
         </div>
       </header>
@@ -295,7 +302,7 @@ export default function HomePage() {
             return (
               <Link
                 key={role.title}
-                href={role.href}
+                href="/login"
                 className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-2 hover:border-slate-300 hover:shadow-xl"
               >
                 <div className="flex items-start justify-between">
@@ -319,6 +326,7 @@ export default function HomePage() {
                 <div className="mt-6 border-t border-slate-100 pt-5 text-sm font-bold text-slate-900">
                   Open dashboard
                 </div>
+            
               </Link>
             );
           })}
