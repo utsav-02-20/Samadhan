@@ -18,8 +18,8 @@ import { Router } from "express";
 
 import citizenRoutes from "../modules/citizens/index.js";
 import governmentRoutes from "../modules/government/index.js";
-// import departmentRoutes from "../modules/department/index.js";
-// import universityRoutes from "../modules/university/index.js";
+import departmentRoutes from "../modules/department/index.js";
+import universityRoutes from "../modules/university/index.js";
 
 const router = Router();
 
@@ -29,7 +29,7 @@ const router = Router();
 
 router.use("/citizens", citizenRoutes);
 router.use("/government", governmentRoutes);
-// router.use("/department", departmentRoutes);
-// router.use("/university", universityRoutes);
+router.use("/department", departmentRoutes);
+router.use("/university", universityRoutes);
 
 export default router;
