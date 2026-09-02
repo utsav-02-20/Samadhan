@@ -1,0 +1,362 @@
+[
+  {
+    "id": "bit-mesra",
+    "name": "Birla Institute of Technology, Mesra",
+    "district": "Ranchi",
+    "city": "Ranchi",
+    "latitude": 23.4123,
+    "longitude": 85.4399,
+    "domains": [
+      "Computer Science & IT",
+      "Civil Infrastructure",
+      "Renewable Energy",
+      "Environmental Engineering",
+      "Electronics"
+    ],
+    "expertise": [
+      "Machine Learning",
+      "IoT",
+      "Remote Sensing & GIS",
+      "Power Systems",
+      "Smart Grids",
+      "Water Resource Management",
+      "Sensor Development"
+    ],
+    "past_performance": {
+      "completed_projects": 25,
+      "successful_projects": 23,
+      "success_rate": 0.92,
+      "domain_projects": {
+        "Computer Science & IT": {
+          "completed": 12,
+          "successful": 11,
+          "success_rate": 0.92
+        },
+        "Renewable Energy": {
+          "completed": 8,
+          "successful": 7,
+          "success_rate": 0.88
+        },
+        "Environmental Engineering": {
+          "completed": 5,
+          "successful": 5,
+          "success_rate": 1.0
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  },
+  {
+    "id": "iit-ism-dhanbad",
+    "name": "Indian Institute of Technology (ISM) Dhanbad",
+    "district": "Dhanbad",
+    "city": "Dhanbad",
+    "latitude": 23.8143,
+    "longitude": 86.4412,
+    "domains": [
+      "Mining & Earth Sciences",
+      "Water Resources",
+      "Environmental Engineering",
+      "Civil Infrastructure",
+      "Mechanical Engineering"
+    ],
+    "expertise": [
+      "Groundwater Hydrology",
+      "Water Quality Analysis",
+      "Chemical Sensors",
+      "Heavy Metal Remediation",
+      "Mining Safety",
+      "Environmental Monitoring",
+      "Hydraulic Systems"
+    ],
+    "past_performance": {
+      "completed_projects": 30,
+      "successful_projects": 27,
+      "success_rate": 0.90,
+      "domain_projects": {
+        "Mining & Earth Sciences": {
+          "completed": 15,
+          "successful": 14,
+          "success_rate": 0.93
+        },
+        "Water Resources": {
+          "completed": 10,
+          "successful": 9,
+          "success_rate": 0.90
+        },
+        "Environmental Engineering": {
+          "completed": 5,
+          "successful": 4,
+          "success_rate": 0.80
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  },
+  {
+    "id": "nit-jamshedpur",
+    "name": "National Institute of Technology Jamshedpur",
+    "district": "East Singhbhum",
+    "city": "Jamshedpur",
+    "latitude": 22.7766,
+    "longitude": 86.1437,
+    "domains": [
+      "Civil Infrastructure",
+      "Mechanical Engineering",
+      "Renewable Energy",
+      "Electrical Engineering",
+      "Materials Science"
+    ],
+    "expertise": [
+      "Structural Analysis",
+      "Transportation Engineering",
+      "Solar Photovoltaics",
+      "IoT",
+      "Automated Pump Systems",
+      "Drainage Engineering",
+      "Smart City Systems"
+    ],
+    "past_performance": {
+      "completed_projects": 20,
+      "successful_projects": 17,
+      "success_rate": 0.85,
+      "domain_projects": {
+        "Civil Infrastructure": {
+          "completed": 10,
+          "successful": 9,
+          "success_rate": 0.90
+        },
+        "Renewable Energy": {
+          "completed": 6,
+          "successful": 5,
+          "success_rate": 0.83
+        },
+        "Water Resources": {
+          "completed": 4,
+          "successful": 3,
+          "success_rate": 0.75
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  },
+  {
+    "id": "birsa-agricultural-university",
+    "name": "Birsa Agricultural University",
+    "district": "Ranchi",
+    "city": "Ranchi",
+    "latitude": 23.4357,
+    "longitude": 85.3183,
+    "domains": [
+      "Agriculture",
+      "Forestry & Ecology",
+      "Veterinary Sciences",
+      "Biotechnology"
+    ],
+    "expertise": [
+      "Soil Science",
+      "Soil Testing",
+      "Agronomy",
+      "Agricultural Engineering",
+      "Crop Disease Management",
+      "Organic Farming",
+      "Irrigation Engineering",
+      "Crop Science"
+    ],
+    "past_performance": {
+      "completed_projects": 22,
+      "successful_projects": 20,
+      "success_rate": 0.91,
+      "domain_projects": {
+        "Agriculture": {
+          "completed": 18,
+          "successful": 17,
+          "success_rate": 0.94
+        },
+        "Environmental Engineering": {
+          "completed": 4,
+          "successful": 3,
+          "success_rate": 0.75
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  },
+  {
+    "id": "ranchi-university",
+    "name": "Ranchi University",
+    "district": "Ranchi",
+    "city": "Ranchi",
+    "latitude": 23.3699,
+    "longitude": 85.3253,
+    "domains": [
+      "Basic Sciences",
+      "Biotechnology",
+      "Social Sciences",
+      "Environmental Science",
+      "Civic Technology"
+    ],
+    "expertise": [
+      "Bio-remediation",
+      "Community Medicine",
+      "Water Quality Testing",
+      "Botany",
+      "Data Analytics",
+      "Public Policy",
+      "Waste Processing"
+    ],
+    "past_performance": {
+      "completed_projects": 15,
+      "successful_projects": 12,
+      "success_rate": 0.80,
+      "domain_projects": {
+        "Basic Sciences": {
+          "completed": 8,
+          "successful": 7,
+          "success_rate": 0.88
+        },
+        "Healthcare": {
+          "completed": 4,
+          "successful": 3,
+          "success_rate": 0.75
+        },
+        "Environmental Science": {
+          "completed": 3,
+          "successful": 2,
+          "success_rate": 0.67
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  },
+  {
+    "id": "aiims-deoghar",
+    "name": "All India Institute of Medical Sciences, Deoghar",
+    "district": "Deoghar",
+    "city": "Deoghar",
+    "latitude": 24.4789,
+    "longitude": 86.6974,
+    "domains": [
+      "Healthcare",
+      "Public Health",
+      "Biomedical Sciences",
+      "Biotechnology"
+    ],
+    "expertise": [
+      "Disease Surveillance",
+      "Epidemiology",
+      "Medical Technology",
+      "Clinical Diagnostics",
+      "Community Health",
+      "Telemedicine",
+      "Health Informatics",
+      "Biomedical Engineering"
+    ],
+    "past_performance": {
+      "completed_projects": 12,
+      "successful_projects": 11,
+      "success_rate": 0.92,
+      "domain_projects": {
+        "Healthcare": {
+          "completed": 12,
+          "successful": 11,
+          "success_rate": 0.92
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  },
+  {
+    "id": "kolhan-university",
+    "name": "Kolhan University",
+    "district": "West Singhbhum",
+    "city": "Chaibasa",
+    "latitude": 22.5539,
+    "longitude": 85.8116,
+    "domains": [
+      "Environmental Science",
+      "Tribal Studies & Rural Development",
+      "Botany",
+      "Basic Sciences"
+    ],
+    "expertise": [
+      "Rural Water Management",
+      "Forest Ecology",
+      "Indigenous Agricultural Practices",
+      "Community Health",
+      "Environmental Monitoring"
+    ],
+    "past_performance": {
+      "completed_projects": 10,
+      "successful_projects": 7,
+      "success_rate": 0.70,
+      "domain_projects": {
+        "Environmental Science": {
+          "completed": 5,
+          "successful": 4,
+          "success_rate": 0.80
+        },
+        "Agriculture": {
+          "completed": 5,
+          "successful": 3,
+          "success_rate": 0.60
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  },
+  {
+    "id": "vinoba-bhave-university",
+    "name": "Vinoba Bhave University",
+    "district": "Hazaribagh",
+    "city": "Hazaribagh",
+    "latitude": 23.9984,
+    "longitude": 85.3615,
+    "domains": [
+      "Mining & Earth Sciences",
+      "Chemistry",
+      "Environmental Engineering",
+      "Biotechnology",
+      "Computer Science & IT"
+    ],
+    "expertise": [
+      "Groundwater Analysis",
+      "Soil Chemistry",
+      "Waste Management",
+      "GIS Mapping",
+      "Renewable Energy",
+      "Environmental Monitoring"
+    ],
+    "past_performance": {
+      "completed_projects": 14,
+      "successful_projects": 10,
+      "success_rate": 0.71,
+      "domain_projects": {
+        "Mining & Earth Sciences": {
+          "completed": 6,
+          "successful": 5,
+          "success_rate": 0.83
+        },
+        "Environmental Engineering": {
+          "completed": 5,
+          "successful": 3,
+          "success_rate": 0.60
+        },
+        "Computer Science & IT": {
+          "completed": 3,
+          "successful": 2,
+          "success_rate": 0.67
+        }
+      }
+    },
+    "_demo_data": true,
+    "_note": "Performance metrics are initial demo values for hackathon simulation; must be replaced by verified institutional records."
+  }
+]
