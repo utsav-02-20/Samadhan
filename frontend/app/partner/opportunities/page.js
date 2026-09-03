@@ -76,7 +76,7 @@ export default function OpportunityDetails() {
 
   // Next.js 15 fix
   const opportunity =
-    opportunities.find((item) => item.id === Number(params.id)) ||
+    opportunities.find((item) => item.id === Number(params?.id)) ||
     opportunities[0];
 
   function handleSubmit(event) {

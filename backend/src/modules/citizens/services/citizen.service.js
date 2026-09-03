@@ -74,24 +74,7 @@ export const createComplaint = async (
   files = []
 ) => {
   const images = await uploadImages(files);
-
-  try {
-    return await Problem.create({
-      citizenId,
-      ...complaintData,
-      images,
-    });
-  } catch (err) {
-    console.warn("MongoDB write skipped (offline DB connection):", err.message);
-    return {
-      _id: "SAM-" + Math.floor(1000 + Math.random() * 9000),
-      citizenId,
-      ...complaintData,
-      images,
-      status: "Pending",
-      createdAt: new Date(),
-    };
-  }
+  return Problem.create({ citizenId, ...complaintData, images });
 };
 
 /* -------------------------------------------------------------------------- */
@@ -104,37 +87,16 @@ export const getPublicFeed = async (filters = {}) => {
   if (filters.category) query.category = filters.category;
   if (filters.status) query.status = filters.status;
 
-  try {
-    return await Problem.find(query)
-      .populate("citizenId", "fullName district")
-      .sort({ createdAt: -1 });
-  } catch (err) {
-    console.warn("MongoDB read skipped (offline DB connection):", err.message);
-    return [
-      {
-        _id: "SAM-1001",
-        title: "Bore well dry in Barha village",
-        description: "Water supply disrupted for 3 days",
-        category: "Water Supply",
-        district: "Ranchi",
-        status: "Pending",
-        upvotes: 14,
-        createdAt: new Date(),
-      },
-    ];
-  }
+  return Problem.find(query)
+    .populate("citizenId", "fullName district")
+    .sort({ createdAt: -1 });
 };
 
 /* -------------------------------------------------------------------------- */
 /* Citizen Complaint History                                                   */
 /* -------------------------------------------------------------------------- */
 export const getCitizenHistory = async (citizenId) => {
-  try {
-    return await Problem.find({ citizenId }).sort({ createdAt: -1 });
-  } catch (err) {
-    console.warn("MongoDB read skipped (offline DB connection):", err.message);
-    return [];
-  }
+  return Problem.find({ citizenId }).sort({ createdAt: -1 });
 };
 
 /* -------------------------------------------------------------------------- */

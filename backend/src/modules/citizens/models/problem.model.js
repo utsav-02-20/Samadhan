@@ -112,6 +112,8 @@ const problemSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    assignedDepartmentId: { type: String, default: "" },
+    decisionReason: { type: String, default: "" },
   },
   {
     timestamps: true,

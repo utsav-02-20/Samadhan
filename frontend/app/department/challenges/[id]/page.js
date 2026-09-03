@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
+import { getDepartmentChallenges } from "@/services/department.service";
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
 import {
@@ -19,15 +20,17 @@ import { DEPARTMENT_CHALLENGES_MOCK } from "@/data/departmentData";
 
 export default function ChallengeDetails({ params }) {
   const resolvedParams = use(params);
-  const challenge =
+  const defaultChallenge =
     DEPARTMENT_CHALLENGES_MOCK.find((c) => c.id === resolvedParams?.id) ||
     DEPARTMENT_CHALLENGES_MOCK[0];
 
-  const [status, setStatus] = useState(challenge.status);
-  const [slaStatus, setSlaStatus] = useState(challenge.slaStatus);
-  const [progress, setProgress] = useState(challenge.progress);
+  const [challenge, setChallenge] = useState(defaultChallenge);
+  useEffect(() => { getDepartmentChallenges().then((res) => { const item = (res?.data || []).find((x) => String(x._id) === String(resolvedParams?.id)); if (item) setChallenge({ ...defaultChallenge, ...item, id: item._id, location: item.locality || item.district }); }).catch(console.error); }, [resolvedParams?.id]);
+  const [status, setStatus] = useState(defaultChallenge.status);
+  const [slaStatus, setSlaStatus] = useState(defaultChallenge.slaStatus);
+  const [progress, setProgress] = useState(defaultChallenge.progress);
   const [newUpdate, setNewUpdate] = useState("");
-  const [updates, setUpdates] = useState(challenge.updates || []);
+  const [updates, setUpdates] = useState(defaultChallenge.updates || []);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   function handleAddUpdate(e) {

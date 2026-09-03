@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { use } from "react";
 import {
   ArrowLeft,
   MapPin,
@@ -16,7 +17,8 @@ import Logo from "@/components/ui/Logo";
 import { REPORT_DETAILS_MOCK as reports } from "@/data/demoData";
 
 export default function ReportDetails({ params }) {
-  const report = reports[params.id] || reports["SAM-1024"];
+  const { id } = use(params);
+  const report = reports[id] || reports["SAM-1024"];
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -95,7 +97,7 @@ export default function ReportDetails({ params }) {
               </h1>
 
               <p className="mt-2 text-sm font-bold text-slate-400">
-                Report ID: {params.id}
+                Report ID: {id}
               </p>
 
             </div>
@@ -151,7 +153,7 @@ export default function ReportDetails({ params }) {
           <Info
             icon={AlertCircle}
             label="Report ID"
-            value={params.id}
+            value={id}
           />
 
         </section>

@@ -20,87 +20,68 @@ import {
 } from "lucide-react";
 
 
-// demo data for statistics, projects and activities
-const stats = [
-  {
-    label: "Active Projects",
-    value: "8",
-    change: "+2 this month",
-    icon: FolderKanban,
-  },
-  {
-    label: "Challenges Applied",
-    value: "14",
-    change: "+4 this month",
-    icon: Trophy,
-  },
-  {
-    label: "Team Members",
-    value: "24",
-    change: "+5 this month",
-    icon: Users,
-  },
-  {
-    label: "Submissions",
-    value: "11",
-    change: "3 under review",
-    icon: FileCheck2,
-  },
-];
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { getUniversityChallenges, getUniversityProjects } from "@/services/university.service";
 
-const projects = [
-  {
-    name: "Road Safety Analytics",
-    department: "Traffic Department",
-    progress: 74,
-    status: "IN PROGRESS",
-  },
-  {
-    name: "Community Water Monitoring",
-    department: "Water Department",
-    progress: 52,
-    status: "IN PROGRESS",
-  },
-  {
-    name: "Smart Waste Collection",
-    department: "Municipal Corporation",
-    progress: 91,
-    status: "FINAL REVIEW",
-  },
-];
-
-const activities = [
-  {
-    title: "Submission approved",
-    description:
-      "AquaTech prototype was approved by Water Department.",
-    time: "2 hours ago",
-    icon: CheckCircle2,
-  },
-  {
-    title: "New challenge available",
-    description:
-      "Smart City Traffic Optimization is now open.",
-    time: "5 hours ago",
-    icon: Trophy,
-  },
-  {
-    title: "Department message",
-    description:
-      "Traffic Department requested a project update.",
-    time: "Yesterday",
-    icon: FileCheck2,
-  },
-  {
-    title: "Milestone approaching",
-    description:
-      "Road Safety Analytics review is due in 5 days.",
-    time: "Yesterday",
-    icon: AlertCircle,
-  },
-];
+// Commented out demo data:
+// const stats = [...];
+// const projects = [...];
+// const activities = [...];
 
 export default function UniversityDashboard() {
+  const [challenges, setChallenges] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    Promise.all([getUniversityChallenges(), getUniversityProjects()])
+      .then(([chalRes, projRes]) => {
+        setChallenges((chalRes?.data || []).map((item) => ({
+          name: item.title,
+          department: item.category || item.district || "General",
+          progress: item.status === "Resolved" ? 100 : (item.status === "In Progress" ? 50 : 25),
+          status: item.status === "Resolved" ? "COMPLETED" : (item.status === "In Progress" ? "IN PROGRESS" : "OPEN"),
+        })));
+        setProjects(projRes?.data || []);
+      })
+      .catch((err) => console.error("Could not load university dashboard data:", err));
+  }, []);
+
+  const activeProjectsList = projects.length > 0 ? projects : challenges;
+
+  const activities = challenges.slice(0, 4).map((c) => ({
+    title: `New challenge: ${c.name}`,
+    description: `Category: ${c.department}`,
+    time: "Recently updated",
+    icon: Trophy,
+  }));
+
+  const dynamicStats = [
+    {
+      label: "Active Projects",
+      value: String(activeProjectsList.length),
+      change: "Live DB count",
+      icon: FolderKanban,
+    },
+    {
+      label: "Challenges Applied",
+      value: String(challenges.length),
+      change: "Live DB count",
+      icon: Trophy,
+    },
+    {
+      label: "Team Members",
+      value: "12",
+      change: "Active research lead",
+      icon: Users,
+    },
+    {
+      label: "Submissions",
+      value: String(challenges.filter(c => c.status === "COMPLETED").length),
+      change: "Completed solutions",
+      icon: FileCheck2,
+    },
+  ];
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
 
@@ -228,7 +209,7 @@ export default function UniversityDashboard() {
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-          {stats.map((stat) => {
+          {dynamicStats.map((stat) => {
 
             const Icon = stat.icon;
 
@@ -300,7 +281,7 @@ export default function UniversityDashboard() {
 
             <div className="divide-y divide-slate-100">
 
-              {projects.map((project) => (
+              {activeProjectsList.map((project) => (
 
                 <Link
                   key={project.name}

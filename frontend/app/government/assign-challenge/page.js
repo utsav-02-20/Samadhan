@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { assignChallengeToDepartment, getGovernmentChallenges } from "@/services/government.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -93,6 +95,8 @@ const departments = [
 ];
 
 export default function AssignChallengePage() {
+  const { getToken } = useAuth();
+  const [liveChallenges, setLiveChallenges] = useState([]);
   const [selectedChallenge, setSelectedChallenge] =
     useState(null);
 
@@ -102,8 +106,19 @@ export default function AssignChallengePage() {
   const [search, setSearch] = useState("");
 
   const [success, setSuccess] = useState(false);
+  useEffect(() => {
+    getToken().then((token) => getGovernmentChallenges(token || undefined))
+      .then((res) => setLiveChallenges((res?.data || []).map((item) => ({
+        ...item,
+        id: item.id || item._id,
+        location: item.district || "",
+        submittedBy: "Government",
+        status: item.status === "OPEN" ? "SUBMITTED" : item.status,
+      }))))
+      .catch((err) => console.error("Could not load government challenges:", err));
+  }, [getToken]);
 
-  const filteredChallenges = challenges.filter((challenge) => {
+  const filteredChallenges = liveChallenges.filter((challenge) => {
     const text = [
       challenge.id,
       challenge.title,
@@ -117,12 +132,23 @@ export default function AssignChallengePage() {
     return text.includes(search.toLowerCase());
   });
 
-  function assignChallenge() {
+  async function assignChallenge() {
     if (!selectedChallenge || !selectedDepartment) {
       return;
     }
 
-    setSuccess(true);
+    try {
+      const token = await getToken();
+      await assignChallengeToDepartment({
+        challengeId: selectedChallenge.id || selectedChallenge._id,
+        departmentId: selectedDepartment.id,
+        departmentName: selectedDepartment.name,
+      }, token || undefined);
+      setSuccess(true);
+    } catch (err) {
+      alert(err?.message || "Challenge assignment failed.");
+      return;
+    }
 
     setTimeout(() => {
       setSuccess(false);

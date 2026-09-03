@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
 import {
@@ -14,13 +14,28 @@ import {
   Filter,
   ShieldCheck,
 } from "lucide-react";
-import { DEPARTMENT_CHALLENGES_MOCK } from "@/data/departmentData";
+import { getDepartmentChallenges } from "@/services/department.service";
 
 export default function DepartmentChallengesPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
+  const [challenges, setChallenges] = useState([]);
+  useEffect(() => {
+    getDepartmentChallenges()
+      .then((res) => setChallenges((res?.data || []).map((item) => ({
+        ...item,
+        id: item._id || item.id,
+        location: item.locality || item.district || "General Locality",
+        slaStatus: "ON_TRACK",
+        routedBy: "Government Portal",
+        slaDeadline: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "-",
+        applicationsCount: item.upvotes || 0,
+        status: item.status === "Pending" ? "ROUTED" : item.status === "In Progress" ? "IN_PROGRESS" : item.status.toUpperCase(),
+      }))))
+      .catch((error) => console.error("Could not load department challenges:", error));
+  }, []);
 
-  const filtered = DEPARTMENT_CHALLENGES_MOCK.filter((item) => {
+  const filtered = challenges.filter((item) => {
     const text = (item.title + " " + item.id + " " + item.category + " " + item.location).toLowerCase();
     const matchesSearch = text.includes(search.toLowerCase());
     const matchesStatus = filterStatus === "ALL" || item.status === filterStatus;

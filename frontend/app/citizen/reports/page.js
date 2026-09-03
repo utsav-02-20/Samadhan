@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,17 +14,26 @@ import {
 } from "lucide-react";
 
 import Logo from "@/components/ui/Logo";
-import { CITIZEN_REPORTS as reports, REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
+import { useUser, useAuth } from "@clerk/nextjs";
+import { getCitizenHistory, toReportView } from "@/services/citizen.service";
+import { REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
 
 export default function MyReportsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
+  const [reports, setReports] = useState([]);
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  useEffect(() => {
+    if (!user) return;
+    getToken().then((token) => getCitizenHistory(user.id, token || undefined))
+      .then((res) => setReports((res?.data || []).map(toReportView)))
+      .catch((err) => console.error("Could not load reports:", err));
+  }, [user, getToken]);
 
   const filteredReports = reports.filter((report) => {
     const searchableText =
-      report.title +
-      " " +
-      report.id +
+      report.title + " " + (report.id || report._id) +
       " " +
       report.category;
 
@@ -33,7 +42,7 @@ export default function MyReportsPage() {
       .includes(search.toLowerCase());
 
     const matchesFilter =
-      filter === "ALL" || report.status === filter;
+      filter === "ALL" || report.status === filter || (filter === "SUBMITTED" && report.status === "Pending");
 
     return matchesSearch && matchesFilter;
   });
@@ -155,7 +164,7 @@ export default function MyReportsPage() {
 
             filteredReports.map((report) => (
               <ReportCard
-                key={report.id}
+                key={report.id || report._id}
                 report={report}
               />
             ))

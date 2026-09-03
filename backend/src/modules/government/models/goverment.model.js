@@ -75,9 +75,10 @@ const challengeSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["OPEN", "ROUTED", "IN_PROGRESS", "RESOLVED"],
+      enum: ["OPEN", "ACCEPTED", "ROUTED", "IN_PROGRESS", "RESOLVED", "REJECTED", "NEEDS_INFO"],
       default: "OPEN",
     },
+    decisionReason: { type: String, default: "" },
   },
   { timestamps: true }
 );

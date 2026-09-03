@@ -8,6 +8,7 @@ import {
   saveAcceptedProject,
   getDepartmentProfile,
   updateDepartmentProfile,
+  getDepartmentChallenges,
 } from "../controllers/department.controller.js";
 
 const router = Router();
@@ -15,6 +16,7 @@ const router = Router();
 router.get("/profile", getDepartmentProfile);
 router.put("/profile", updateDepartmentProfile);
 router.get("/accepted-projects", getAcceptedProjects);
+router.get("/challenges", getDepartmentChallenges);
 router.post("/accepted-projects", saveAcceptedProject);
 router.post("/", createDepartment);
 router.get("/", getDepartments);

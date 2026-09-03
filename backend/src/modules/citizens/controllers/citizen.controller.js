@@ -55,7 +55,14 @@ export const registerCitizen = async (req, res) => {
 /* -------------------------------------------------------------------------- */
 export const createComplaint = async (req, res) => {
   try {
-    const complaintData = problemSubmissionSchema.parse(req.body);
+    const complaintData = problemSubmissionSchema.parse({
+      ...req.body,
+      locality: req.body.locality || req.body.location || "General Locality",
+      location: {
+        latitude: req.body.latitude ?? req.body["location.latitude"] ?? 0,
+        longitude: req.body.longitude ?? req.body["location.longitude"] ?? 0,
+      },
+    });
 
     const complaint = await citizenService.createComplaint(
       req.params.citizenId,

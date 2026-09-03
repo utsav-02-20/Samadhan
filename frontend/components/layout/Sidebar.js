@@ -109,8 +109,8 @@ export default function Sidebar({ role = "government" }) {
                 key={item.href}
                 href={item.href}
                 className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${active
-                    ? "bg-slate-950 text-white shadow-sm"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                    ? "bg-[#401AD9] text-white shadow-sm"
+                    : "text-slate-600 hover:bg-indigo-50/50 hover:text-[#401AD9]"
                   }`}
               >
 
@@ -144,7 +144,7 @@ export default function Sidebar({ role = "government" }) {
 
         <div className="flex items-center gap-3 rounded-xl p-3">
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#401AD9]/10 text-sm font-bold text-[#401AD9]">
             {roleName.charAt(0)}
           </div>
 

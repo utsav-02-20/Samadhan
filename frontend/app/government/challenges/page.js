@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { getGovernmentChallenges } from "@/services/government.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -116,12 +118,25 @@ const priorityConfig = {
 };
 
 export default function GovernmentChallengesPage() {
+  const [liveChallenges, setLiveChallenges] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("ALL");
+  useEffect(() => {
+    getGovernmentChallenges()
+      .then((res) => setLiveChallenges((res?.data || []).map((item) => ({
+        ...item,
+        id: item.id || item._id,
+        department: item.targetDepartment || "Unassigned",
+        date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "",
+        status: item.status === "Pending" ? "SUBMITTED" : item.status === "In Progress" ? "ASSIGNED" : item.status,
+      }))))
+      .catch((err) => { setLoadError(err.message || "Could not load challenges"); console.error(err); });
+  }, []);
   const [priority, setPriority] = useState("ALL");
 
   const filteredChallenges = useMemo(() => {
-    return challenges.filter((challenge) => {
+    return liveChallenges.filter((challenge) => {
       const searchableText = [
         challenge.id,
         challenge.title,

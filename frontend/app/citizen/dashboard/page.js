@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -14,10 +15,23 @@ import {
 } from "lucide-react";
 
 import Logo from "@/components/ui/Logo";
+import { useCitizenAutoRegister } from "@/hooks/useCitizen";
+import { useUser, useAuth } from "@clerk/nextjs";
+import { getCitizenHistory, toReportView } from "@/services/citizen.service";
 
-import { CITIZEN_REPORTS as reports, REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
+import { REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
 
 export default function CitizenDashboard() {
+  useCitizenAutoRegister();
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const [reports, setReports] = useState([]);
+  useEffect(() => {
+    if (!user) return;
+    getToken().then((token) => getCitizenHistory(user.id, token || undefined))
+      .then((res) => setReports((res?.data || []).map(toReportView)))
+      .catch((err) => console.error("Could not load reports:", err));
+  }, [user, getToken]);
   const pendingCount = reports.filter(
     (report) =>
       report.status === "SUBMITTED" ||

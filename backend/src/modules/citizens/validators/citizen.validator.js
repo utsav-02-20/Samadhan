@@ -25,17 +25,22 @@ import { z } from "zod";
 export const registerCitizenSchema = z.object({
   clerkId: z.string().min(1, "Clerk ID is required"),
 
-  fullName: z.string().min(3, "Full name must be at least 3 characters"),
+  fullName: z.string().optional().default("Citizen User"),
 
-  email: z.string().email("Invalid email address"),
+  name: z.string().optional(),
 
-  phone: z
-    .string()
-    .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number")
-    .optional(),
+  email: z.string().optional().default("citizen@samadhan.gov.in"),
 
-  district: z.string().min(2, "District is required"),
-});
+  phone: z.string().optional(),
+
+  district: z.string().optional().default("General"),
+}).transform((val) => ({
+  clerkId: val.clerkId,
+  fullName: val.fullName || val.name || "Citizen User",
+  email: val.email || "citizen@samadhan.gov.in",
+  phone: val.phone || "",
+  district: val.district || "General",
+}));
 
 /* -------------------------------------------------------------------------- */
 /* Problem Submission Validation                                               */

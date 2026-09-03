@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { getGovernmentChallenges } from "@/services/government.service";
 import {
   AlertCircle,
   ArrowRight,
@@ -15,7 +18,7 @@ import {
 } from "lucide-react";
 
 import Logo from "@/components/ui/Logo";
-import { GOVERNMENT_STATS, GOVERNMENT_RECENT_CHALLENGES as recentChallenges } from "@/data/demoData";
+import { GOVERNMENT_STATS } from "@/data/demoData";
 
 const govIconMap = { FileText, Clock3, CheckCircle2, FolderKanban };
 const stats = GOVERNMENT_STATS.map((s) => ({ ...s, icon: govIconMap[s.icon] || FileText }));
@@ -35,6 +38,20 @@ const statusLabels = {
 };
 
 export default function GovernmentDashboard() {
+  const { getToken } = useAuth();
+  const [recentChallenges, setRecentChallenges] = useState([]);
+  useEffect(() => {
+    getToken().then((token) => getGovernmentChallenges(token || undefined))
+      .then((res) => setRecentChallenges((res?.data || []).slice(0, 5).map((item) => ({
+        ...item,
+        id: item.id || item._id,
+        department: item.department || item.targetDepartment || "Unassigned",
+        submittedBy: item.submittedBy || "Government",
+        date: item.date || (item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : ""),
+        status: item.status === "OPEN" ? "SUBMITTED" : item.status,
+      }))))
+      .catch((err) => console.error("Could not load government data:", err));
+  }, [getToken]);
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
 

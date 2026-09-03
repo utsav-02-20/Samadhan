@@ -3,6 +3,7 @@ import {
   getGovernmentById,
   getGovernments,
 } from "../services/goverment.service.js";
+import Problem from "../../citizens/models/problem.model.js";
 
 export const createGovernmentController = async (req, res) => {
   const government = await createGovernment(req.body);
@@ -32,31 +33,29 @@ export const getGovernmentsController = async (req, res) => {
   });
 };
 
-import { Challenge } from "../models/goverment.model.js";
-
 export const createChallengeController = async (req, res, next) => {
   try {
-    const { title, category, description, targetDepartment, district, budget, slaDays } = req.body;
+    const { title, category, description, district, locality } = req.body;
 
     if (!title || !category) {
       return res.status(400).json({ success: false, message: "Title and category are required." });
     }
 
-    const challenge = await Challenge.create({
+    const problem = await Problem.create({
+      citizenId: "government-admin",
       title,
       category,
-      description,
-      targetDepartment,
-      district,
-      budget,
-      slaDays: slaDays || 14,
-      status: "OPEN",
+      description: description || "Government initiated challenge",
+      district: district || "Ranchi",
+      locality: locality || "General Locality",
+      location: { latitude: 0, longitude: 0 },
+      status: "Pending",
     });
 
     return res.status(201).json({
       success: true,
       message: "Government challenge created successfully.",
-      data: challenge,
+      data: problem,
     });
   } catch (error) {
     next(error);
@@ -65,63 +64,55 @@ export const createChallengeController = async (req, res, next) => {
 
 export const getChallengesController = async (req, res, next) => {
   try {
-    const challenges = await Challenge.find().sort({ createdAt: -1 });
+    const problems = await Problem.find().sort({ createdAt: -1 });
     return res.status(200).json({
       success: true,
-      count: challenges.length,
-      data: challenges,
+      count: problems.length,
+      data: problems,
     });
-  } catch (error) {
-    console.warn("MongoDB read skipped (offline DB connection):", error.message);
-    return res.status(200).json({
-      success: true,
-      count: 2,
-      data: [
-        {
-          _id: "CH-101",
-          title: "Pothole repair on Main Road",
-          category: "Roads",
-          description: "Major pothole reported by Barha village citizens",
-          targetDepartment: "Public Works Department",
-          district: "Ranchi",
-          budget: "₹2,50,000",
-          status: "OPEN",
-        },
-        {
-          _id: "CH-102",
-          title: "Borewell solar pump installation",
-          category: "Water Supply",
-          description: "Clean water supply infrastructure project",
-          targetDepartment: "Water Department",
-          district: "Dumka",
-          budget: "₹5,00,000",
-          status: "ROUTED",
-        },
-      ],
-    });
-  }
+  } catch (error) { next(error); }
 };
 
 export const assignChallengeController = async (req, res, next) => {
   try {
     const { challengeId, departmentId, departmentName } = req.body;
 
-    const challenge = await Challenge.findById(challengeId);
-    if (!challenge) {
-      return res.status(404).json({ success: false, message: "Challenge not found." });
+    const problem = await Problem.findById(challengeId);
+    if (!problem) {
+      return res.status(404).json({ success: false, message: "Problem not found." });
     }
 
-    challenge.assignedDepartmentId = departmentId;
-    if (departmentName) challenge.targetDepartment = departmentName;
-    challenge.status = "ROUTED";
-    await challenge.save();
+    problem.status = "In Progress";
+    problem.assignedDepartmentId = departmentId || departmentName || "";
+    await problem.save();
 
     return res.status(200).json({
       success: true,
-      message: "Challenge assigned to department successfully.",
-      data: challenge,
+      message: "Problem assigned to department successfully.",
+      data: problem,
     });
   } catch (error) {
     next(error);
   }
+};
+
+export const updateChallengeStatusController = async (req, res, next) => {
+  try {
+    const { status, reason = "" } = req.body;
+    
+    // Map status string to Problem model status enum
+    let mappedStatus = status;
+    if (status === "ACCEPTED" || status === "ROUTED" || status === "IN_PROGRESS") mappedStatus = "In Progress";
+    if (status === "REJECTED") mappedStatus = "Rejected";
+    if (status === "RESOLVED") mappedStatus = "Resolved";
+
+    const problem = await Problem.findByIdAndUpdate(
+      req.params.id,
+      { status: mappedStatus, decisionReason: reason },
+      { new: true, runValidators: true }
+    );
+
+    if (!problem) return res.status(404).json({ success: false, message: "Problem not found." });
+    res.json({ success: true, data: problem });
+  } catch (error) { next(error); }
 };

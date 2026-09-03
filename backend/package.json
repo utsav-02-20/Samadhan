@@ -2,7 +2,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js", 
+    "build": "echo Build successful"
   },
   "dependencies": {
     "@clerk/backend": "^3.16.13",

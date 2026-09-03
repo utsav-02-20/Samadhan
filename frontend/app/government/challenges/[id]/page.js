@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { getGovernmentChallenges, updateGovernmentChallengeStatus, assignChallengeToDepartment } from "@/services/government.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,7 +19,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-const challenge = {
+const defaultChallenge = {
   id: "SAM-1024",
   title: "Broken street lights in residential area",
   description:
@@ -76,6 +79,16 @@ const departments = [
 ];
 
 export default function GovernmentChallengeDetails() {
+  const { id } = useParams();
+  const { getToken } = useAuth();
+  const [challenge, setChallenge] = useState(defaultChallenge);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    getToken().then((token) => getGovernmentChallenges(token || undefined)).then((res) => {
+      const item = (res?.data || []).find((value) => String(value._id || value.id) === String(id));
+      if (item) setChallenge({ ...defaultChallenge, ...item, id: item._id || item.id, department: item.targetDepartment || "Unassigned", status: item.status === "OPEN" ? "SUBMITTED" : item.status, submittedDate: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : defaultChallenge.submittedDate, decisionReason: item.decisionReason || "" });
+    }).catch((error) => setMessage(error.message)).finally(() => setLoading(false));
+  }, [id, getToken]);
   const [currentStatus, setCurrentStatus] = useState(
     challenge.status
   );
@@ -84,6 +97,7 @@ export default function GovernmentChallengeDetails() {
     useState(challenge.department);
 
   const [note, setNote] = useState("");
+  const [decisionReason, setDecisionReason] = useState("");
 
   const [notes, setNotes] = useState([
     {
@@ -104,21 +118,14 @@ export default function GovernmentChallengeDetails() {
 
   const [message, setMessage] = useState("");
 
-  function handleStatusChange(status) {
-    setCurrentStatus(status);
-
-    if (status === "ACCEPTED") {
-      setMessage("Challenge accepted successfully.");
-    }
-
-    if (status === "REJECTED") {
-      setMessage("Challenge rejected.");
-    }
-
-    if (status === "NEEDS_INFO") {
-      setMessage("Additional information requested.");
-    }
-
+  async function handleStatusChange(status, reason = "") {
+    try {
+      const token = await getToken();
+      const res = await updateGovernmentChallengeStatus(id || challenge.id, status, reason, token || undefined);
+      setChallenge((value) => ({ ...value, ...res.data, targetDepartment: res.data.targetDepartment || value.targetDepartment }));
+      setCurrentStatus(status);
+      setMessage(status === "ACCEPTED" ? "Challenge accepted successfully." : "Challenge updated successfully.");
+    } catch (error) { setMessage(error.message || "Could not update challenge."); return; }
     setTimeout(() => setMessage(""), 3000);
   }
 
@@ -137,7 +144,11 @@ export default function GovernmentChallengeDetails() {
     setNote("");
   }
 
-  function assignDepartment() {
+  async function assignDepartment() {
+    try {
+      const token = await getToken();
+      await assignChallengeToDepartment({ challengeId: id || challenge.id, departmentId: selectedDepartment, departmentName: selectedDepartment }, token || undefined);
+    } catch (error) { setMessage(error.message || "Could not assign department."); return; }
     setShowAssignModal(false);
 
     setCurrentStatus("ASSIGNED");
@@ -666,6 +677,8 @@ export default function GovernmentChallengeDetails() {
 
           <textarea
             placeholder="Reason for rejection..."
+            value={decisionReason}
+            onChange={(event) => setDecisionReason(event.target.value)}
             className="mt-5 min-h-28 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm outline-none focus:border-red-400 focus:bg-white"
           />
 
@@ -708,6 +721,8 @@ export default function GovernmentChallengeDetails() {
 
           <textarea
             placeholder="What information do you need?"
+            value={decisionReason}
+            onChange={(event) => setDecisionReason(event.target.value)}
             className="mt-5 min-h-28 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
           />
 

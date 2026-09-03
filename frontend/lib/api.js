@@ -1,4 +1,10 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api/v1";
+const configuredApiUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000/api/v1";
+const API_BASE_URL = configuredApiUrl.replace(/\/$/, "").endsWith("/api/v1")
+  ? configuredApiUrl.replace(/\/$/, "")
+  : `${configuredApiUrl.replace(/\/$/, "")}/api/v1`;
 
 export async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;

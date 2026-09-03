@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -117,8 +118,14 @@ export default function GovernmentDepartmentsPage() {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="Samadhan Logo"
+                  width={60}
+                  height={60}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div>

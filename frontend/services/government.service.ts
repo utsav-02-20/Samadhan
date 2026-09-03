@@ -33,6 +33,10 @@ export async function assignChallengeToDepartment(payload: { challengeId: string
   });
 }
 
+export async function updateGovernmentChallengeStatus(id: string, status: string, reason = "", token?: string) {
+  return apiFetch(`/government/challenges/${id}/status`, { method: "PATCH", body: { status, reason }, token });
+}
+
 export async function getGovernmentProfile(id: string, token?: string) {
   return apiFetch(`/government/${id}`, {
     method: "GET",

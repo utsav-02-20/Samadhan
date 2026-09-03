@@ -11,6 +11,16 @@
 
 import { apiFetch } from "@/lib/api";
 
+export function toReportView(item: any) {
+  return {
+    ...item,
+    id: item.id || item._id,
+    location: item.locality || item.district || "General",
+    date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "",
+    status: item.status === "Pending" ? "SUBMITTED" : item.status,
+  };
+}
+
 export interface CitizenRegisterPayload {
   clerkId: string;
   name: string;

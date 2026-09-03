@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useParams } from "next/navigation";
 import {
   ArrowLeft,
   Building2,
@@ -110,10 +111,11 @@ const opportunities = {
 };
 
 export default function OpportunityDetails({ params }) {
+  const { id } = useParams();
   const [showApply, setShowApply] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const opportunity = opportunities[params.id] || opportunities[1];
+  const opportunity = opportunities[id] || opportunities[1];
 
   function handleSubmit(event) {
     event.preventDefault();

@@ -23,9 +23,9 @@ const categories = [
   "Street Lights",
   "Sanitation",
   "Water Supply",
-  "Public Safety",
+  "Electricity",
   "Drainage",
-  "Environment",
+  "Healthcare",
   "Other",
 ];
 
@@ -108,6 +108,7 @@ export default function ReportIssuePage() {
       formData.append("description", description);
       formData.append("category", category);
       formData.append("district", district);
+      formData.append("locality", location || "General Locality");
       formData.append("latitude", coords.latitude || "0");
       formData.append("longitude", coords.longitude || "0");
       formData.append("images", photo);
@@ -121,9 +122,7 @@ export default function ReportIssuePage() {
       setReportId(id);
       setSubmitted(true);
     } catch (err) {
-      const fallbackId = "SAM-" + Math.floor(1000 + Math.random() * 9000);
-      setReportId(fallbackId);
-      setSubmitted(true);
+      alert(err?.message || "Report could not be submitted. Please try again.");
     } finally {
       setSubmitting(false);
     }

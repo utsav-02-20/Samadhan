@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
+import { useAuth } from "@clerk/nextjs";
+import { getUniversityChallenges } from "@/services/university.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -17,113 +19,8 @@ import {
   Users,
 } from "lucide-react";
 
-// demo data for challenges
-const challenges = [
-  {
-    id: "SAM-1042",
-    title: "Smart Waste Collection System",
-    description:
-      "Develop an efficient solution to optimize waste collection routes and improve monitoring of municipal waste bins.",
-    category: "Technology",
-    department: "Municipal Services",
-    location: "District-wide",
-    status: "OPEN",
-    applications: 8,
-    deadline: "18 Sep 2026",
-    daysLeft: 18,
-  },
-  {
-    id: "SAM-1038",
-    title: "Accessible Public Transport",
-    description:
-      "Design practical solutions to improve accessibility and navigation for citizens using public transportation.",
-    category: "Infrastructure",
-    department: "Transport Department",
-    location: "City Centre",
-    status: "OPEN",
-    applications: 5,
-    deadline: "21 Sep 2026",
-    daysLeft: 21,
-  },
-  {
-    id: "SAM-1031",
-    title: "Water Conservation Monitoring",
-    description:
-      "Create a monitoring solution to identify water wastage and encourage efficient water usage in public facilities.",
-    category: "Environment",
-    department: "Water Department",
-    location: "Sector 12",
-    status: "OPEN",
-    applications: 12,
-    deadline: "25 Sep 2026",
-    daysLeft: 25,
-  },
-  {
-    id: "SAM-1027",
-    title: "Smart Streetlight Monitoring",
-    description:
-      "Build a system that can identify faulty streetlights and help departments respond faster to lighting issues.",
-    category: "Technology",
-    department: "Electrical Department",
-    location: "Ward 12",
-    status: "OPEN",
-    applications: 14,
-    deadline: "28 Sep 2026",
-    daysLeft: 28,
-  },
-  {
-    id: "SAM-1021",
-    title: "Road Safety Analytics",
-    description:
-      "Analyze accident-prone areas and propose data-driven interventions to improve road safety.",
-    category: "Safety",
-    department: "Traffic Department",
-    location: "Multiple Areas",
-    status: "OPEN",
-    applications: 7,
-    deadline: "02 Oct 2026",
-    daysLeft: 32,
-  },
-  {
-    id: "SAM-1018",
-    title: "Digital Literacy for Citizens",
-    description:
-      "Develop a community-focused program to improve digital literacy and access to government services.",
-    category: "Education",
-    department: "Education Department",
-    location: "District-wide",
-    status: "OPEN",
-    applications: 4,
-    deadline: "05 Oct 2026",
-    daysLeft: 35,
-  },
-  {
-    id: "SAM-1011",
-    title: "Public Park Improvement",
-    description:
-      "Propose sustainable ideas for improving public parks, accessibility and community participation.",
-    category: "Environment",
-    department: "Municipal Services",
-    location: "Central Park",
-    status: "CLOSED",
-    applications: 19,
-    deadline: "20 Aug 2026",
-    daysLeft: 0,
-  },
-  {
-    id: "SAM-1008",
-    title: "Flood Risk Mapping",
-    description:
-      "Create a data-driven approach for identifying flood-prone areas and improving local preparedness.",
-    category: "Safety",
-    department: "Public Works",
-    location: "Low-lying Areas",
-    status: "CLOSED",
-    applications: 16,
-    deadline: "15 Aug 2026",
-    daysLeft: 0,
-  },
-];
+// Commented out static demo data:
+// const challenges = [...];
 
 const categories = [
   "All Categories",
@@ -146,10 +43,28 @@ const departments = [
 ];
 
 export default function UniversityChallengesPage() {
+  const [challenges, setChallenges] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [department, setDepartment] = useState("All Departments");
   const [status, setStatus] = useState("ALL");
+
+  useEffect(() => {
+    getUniversityChallenges()
+      .then((res) => setChallenges((res?.data || []).map((item) => ({
+        id: item.id || item._id,
+        title: item.title,
+        description: item.description,
+        category: item.category,
+        department: item.department || item.district || "General",
+        location: item.locality || item.district || "General Locality",
+        status: item.status === "Pending" ? "OPEN" : item.status === "In Progress" ? "IN_PROGRESS" : item.status,
+        applications: item.upvotes || 0,
+        deadline: "30 Sep 2026",
+        daysLeft: 14,
+      }))))
+      .catch((err) => console.error("Could not load university challenges:", err));
+  }, []);
 
   const filteredChallenges = useMemo(() => {
     return challenges.filter((challenge) => {

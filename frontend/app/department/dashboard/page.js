@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getDepartmentChallenges } from "@/services/department.service";
 import Logo from "@/components/ui/Logo";
 import {
   Flag,
@@ -18,10 +20,15 @@ import {
 } from "lucide-react";
 import {
   DEPARTMENT_PROJECTS_DETAILED as projects,
-  DEPARTMENT_CHALLENGES_MOCK as challenges,
 } from "@/data/departmentData";
 
 export default function DepartmentDashboard() {
+  const [challenges, setChallenges] = useState([]);
+  useEffect(() => {
+    getDepartmentChallenges().then((res) => setChallenges((res?.data || []).map((item) => ({
+      ...item, id: item._id || item.id, status: item.status === "Pending" ? "ROUTED" : item.status === "In Progress" ? "IN_PROGRESS" : item.status, slaStatus: "ON_TRACK", location: item.locality || item.district || "General Locality"
+    })))).catch((error) => console.error("Could not load department dashboard:", error));
+  }, []);
   const pendingCount = challenges.filter((c) => c.status === "ROUTED" || c.status === "IN_PROGRESS").length;
   const atRiskCount = challenges.filter((c) => c.slaStatus === "AT_RISK").length;
 

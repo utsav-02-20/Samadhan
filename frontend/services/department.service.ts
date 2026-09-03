@@ -17,6 +17,10 @@ import {
 } from "@/data/departmentFullData";
 import { apiFetch } from "@/lib/api";
 
+export async function getDepartmentChallenges(token?: string) {
+  return apiFetch("/department/challenges", { method: "GET", token });
+}
+
 export interface DepartmentProfileData {
   id: string;
   name: string;

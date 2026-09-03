@@ -148,7 +148,7 @@ export default function HomePage() {
 
             <h1 className="max-w-3xl text-5xl font-bold leading-[1.05] tracking-[-0.04em] sm:text-6xl lg:text-7xl">
               Turning civic
-              <span className="block text-indigo-600">challenges</span>
+              <span className="block text-[#401AD9]">challenges</span>
               into solutions.
             </h1>
 
@@ -223,7 +223,7 @@ export default function HomePage() {
                   <p className="mt-2 text-3xl font-bold text-indigo-950">
                     86
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-indigo-600">
+                  <p className="mt-1 text-xs font-semibold text-[#401AD9]">
                     32 in progress
                   </p>
                 </div>
@@ -286,7 +286,7 @@ export default function HomePage() {
       {/* Ecosystem */}
       <section id="ecosystem" className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
         <div className="max-w-2xl">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-indigo-600">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#401AD9]">
             The ecosystem
           </p>
 
@@ -347,7 +347,7 @@ export default function HomePage() {
       >
         <div className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
           <div className="text-center">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-indigo-600">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#401AD9]">
               How it works
             </p>
 
@@ -401,7 +401,7 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 px-6 py-10 text-white shadow-lg sm:px-8">
           {/* Decorative elements */}
-          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-indigo-600/20 blur-3xl" />
+          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#401AD9]/20 blur-3xl" />
           <div className="absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-blue-600/20 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">

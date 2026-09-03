@@ -34,8 +34,8 @@ const roles = [
     href: "/login/government",
     //href: "/government/auth/sign-in",
     icon: Landmark,
-    accent: "bg-indigo-50 text-indigo-600",
-    hover: "group-hover:bg-indigo-600",
+    accent: "bg-indigo-50 text-[#401AD9]",
+    hover: "group-hover:bg-[#401AD9]",
     badge: "Administration",
   },
   {
@@ -117,14 +117,14 @@ export default function LoginPage() {
             {/* Heading */}
             <div className="mx-auto max-w-3xl text-center">
 
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-4 py-2 text-xs font-bold text-indigo-600 shadow-sm">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-4 py-2 text-xs font-bold text-[#401AD9] shadow-sm">
                 <Sparkles className="h-3.5 w-3.5" />
                 Secure platform access
               </div>
 
               <h1 className="text-4xl font-black tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-6xl">
                 Welcome to{" "}
-                <span className="text-indigo-600">Samadhan</span>
+                <span className="text-[#401AD9]">Samadhan</span>
               </h1>
 
               <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-500 sm:text-lg">
@@ -171,7 +171,7 @@ export default function LoginPage() {
 
               <Link
                 href="/create-account"
-                className="ml-2 text-sm font-bold text-indigo-600 transition hover:text-indigo-700"
+                className="ml-2 text-sm font-bold text-[#401AD9] transition hover:text-indigo-700"
               >
                 Create an account
                 <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
@@ -203,7 +203,7 @@ function RoleCard({ role }) {
       className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-900/10"
     >
       {/* Top accent */}
-      <div className="absolute left-0 right-0 top-0 h-1 origin-left scale-x-0 bg-indigo-600 transition-transform duration-300 group-hover:scale-x-100" />
+      <div className="absolute left-0 right-0 top-0 h-1 origin-left scale-x-0 bg-[#401AD9] transition-transform duration-300 group-hover:scale-x-100" />
 
       <div className="flex items-start justify-between">
 
@@ -232,7 +232,7 @@ function RoleCard({ role }) {
         {role.description}
       </p>
 
-      <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-5 text-xs font-bold text-slate-700 transition group-hover:text-indigo-600">
+      <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-5 text-xs font-bold text-slate-700 transition group-hover:text-[#401AD9]">
         Continue as {role.title}
         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
       </div>

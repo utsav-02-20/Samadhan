@@ -31,7 +31,7 @@ export default function GovernmentLogin() {
         {/* Left panel */}
         <section className="relative hidden overflow-hidden bg-slate-950 lg:flex">
 
-          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-indigo-600/30 blur-3xl" />
+          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#401AD9]/30 blur-3xl" />
 
           <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl" />
 
@@ -91,11 +91,11 @@ export default function GovernmentLogin() {
 
             <div className="mt-10 lg:mt-0">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-[#401AD9]">
                 <Landmark className="h-6 w-6" />
               </div>
 
-              <p className="mt-7 text-sm font-bold uppercase tracking-[0.18em] text-indigo-600">
+              <p className="mt-7 text-sm font-bold uppercase tracking-[0.18em] text-[#401AD9]">
                 Government
               </p>
 
@@ -144,7 +144,7 @@ export default function GovernmentLogin() {
 
                   <button
                     type="button"
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                    className="text-xs font-semibold text-[#401AD9] hover:text-indigo-700"
                   >
                     Forgot password?
                   </button>
