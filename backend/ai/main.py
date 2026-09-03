@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import is_gemini_configured
+from config import is_gemini_configured, CLIENT_URL, CORS_ORIGIN
 from schemas.problem import ProblemAnalysis, ProblemClassifyRequest
 from schemas.university import RoutingResponse, AnalyzeAndRouteResponse
 from services.categorization import categorize_problem
@@ -14,10 +14,11 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Enable CORS for local Node.js backend and Next.js frontend
+# Enable CORS for Next.js frontend client URL and Node backend
+origins = list(set([CLIENT_URL, CORS_ORIGIN, "http://localhost:3000", "http://localhost:5000"]))
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

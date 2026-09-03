@@ -14,6 +14,9 @@
 import Problem from "../modules/citizens/models/problem.model.js";
 import University from "../modules/university/models/university.model.js";
 
+// Read frontend client URL from environment variables
+export const CLIENT_URL = process.env.CLIENT_URL || process.env.AI_SERVICE_URL || "http://localhost:3000";
+
 /**
  * 1. AI Categorizer & Severity Scoring
  * Analyzes citizen problem title & description text.

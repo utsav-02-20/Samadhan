@@ -46,3 +46,11 @@ export async function submitUniversityProposal(payload: any, token?: string) {
     token,
   });
 }
+
+export async function triggerAITaskAllocation(problemId?: string, token?: string) {
+  return apiFetch("/university/ai-assign", {
+    method: "POST",
+    body: problemId ? { problemId } : {},
+    token,
+  });
+}
