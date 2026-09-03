@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Trophy,
@@ -18,6 +19,8 @@ import {
   Building2,
 } from "lucide-react";
 
+
+// demo data for statistics, projects and activities
 const stats = [
   {
     label: "Active Projects",
@@ -113,8 +116,14 @@ export default function UniversityDashboard() {
             href="/university/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+              <Image
+                src="/logo.png"
+                alt="Samadhan Logo"
+                width={60}
+                height={60}
+                className="h-full w-full object-cover"
+              />
             </div>
 
             <div className="hidden sm:block">
@@ -132,7 +141,7 @@ export default function UniversityDashboard() {
 
           <nav className="ml-8 hidden items-center gap-1 lg:flex">
 
-            
+
 
             <NavItem
               href="/university/challenges"
@@ -211,7 +220,7 @@ export default function UniversityDashboard() {
 
           </div>
 
-         
+
 
         </section>
 
@@ -483,11 +492,10 @@ function NavItem({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition ${
-        active
+      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition ${active
           ? "bg-slate-950 text-white"
           : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-      }`}
+        }`}
     >
       <Icon className="h-3.5 w-3.5" />
       {label}

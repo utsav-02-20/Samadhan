@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, FileText, Clock3, CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 
+// demo data for applications
 const applications = [
   {
     id: "APP-1001",

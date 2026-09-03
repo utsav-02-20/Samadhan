@@ -13,71 +13,8 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
-const reports = [
-  {
-    id: "SAM-1024",
-    title: "Broken street light",
-    category: "Street Lights",
-    location: "Main Market Road",
-    status: "UNDER_REVIEW",
-    date: "28 Aug 2026",
-    description:
-      "The street light near the main market has not been working for several days.",
-  },
-  {
-    id: "SAM-1018",
-    title: "Garbage accumulation",
-    category: "Sanitation",
-    location: "Sector 4 Community Park",
-    status: "ACCEPTED",
-    date: "24 Aug 2026",
-    description:
-      "Garbage has accumulated near the entrance of the community park.",
-  },
-  {
-    id: "SAM-1007",
-    title: "Damaged road",
-    category: "Roads",
-    location: "University Road",
-    status: "RESOLVED",
-    date: "18 Aug 2026",
-    description:
-      "A large pothole was causing difficulty for vehicles and pedestrians.",
-  },
-  {
-    id: "SAM-0998",
-    title: "Blocked drainage",
-    category: "Drainage",
-    location: "Station Road",
-    status: "SUBMITTED",
-    date: "12 Aug 2026",
-    description:
-      "The drainage line appears to be blocked and water is accumulating.",
-  },
-];
-
-const statusConfig = {
-  SUBMITTED: {
-    label: "Submitted",
-    className: "bg-slate-100 text-slate-600",
-    icon: Clock3,
-  },
-  UNDER_REVIEW: {
-    label: "Under review",
-    className: "bg-amber-50 text-amber-700",
-    icon: Clock3,
-  },
-  ACCEPTED: {
-    label: "Accepted",
-    className: "bg-blue-50 text-blue-700",
-    icon: CheckCircle2,
-  },
-  RESOLVED: {
-    label: "Resolved",
-    className: "bg-emerald-50 text-emerald-700",
-    icon: CheckCircle2,
-  },
-};
+import Logo from "@/components/ui/Logo";
+import { CITIZEN_REPORTS as reports, REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
 
 export default function MyReportsPage() {
   const [search, setSearch] = useState("");
@@ -115,17 +52,7 @@ export default function MyReportsPage() {
             Dashboard
           </Link>
 
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
-            </div>
-
-            <span className="font-bold">
-              Samadhan
-            </span>
-
-          </div>
+          <Logo href="/" size="sm" />
 
         </div>
       </header>

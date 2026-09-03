@@ -41,6 +41,32 @@ const departmentSchema = new mongoose.Schema(
         },
       },
     ],
+    acceptedProjects: [
+      {
+        id: String,
+        title: String,
+        university: String,
+        leadResearcher: String,
+        budgetGranted: String,
+        status: {
+          type: String,
+          default: "IN_PROGRESS",
+        },
+        progressPercentage: {
+          type: Number,
+          default: 0,
+        },
+        acceptedDate: String,
+        targetCompletion: String,
+        abstract: String,
+        deliverables: [
+          {
+            name: String,
+            status: String,
+          },
+        ],
+      },
+    ],
   },
   { timestamps: true }
 );

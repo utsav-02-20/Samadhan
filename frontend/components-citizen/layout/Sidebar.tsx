@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,8 +14,8 @@ import {
 
 const navigationItems = [
   { name: "Explore Challenges", href: "/citizen/dashboard", icon: LayoutDashboard },
-  { name: "Submit Challenge", href: "/citizen/submit", icon: PlusCircle },
-  { name: "My Profile", href: "/citizen/user/citizen", icon: User },
+  { name: "Submit Challenge", href: "/citizen/report", icon: PlusCircle },
+  { name: "My Reports", href: "/citizen/reports", icon: FolderOpen },
 ];
 
 export default function Sidebar({ role = "citizen" }: { role?: string }) {
@@ -25,8 +26,14 @@ export default function Sidebar({ role = "citizen" }: { role?: string }) {
       {/* Brand Header */}
       <div className="flex h-20 items-center border-b border-slate-100 px-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0c2340] text-base font-bold text-white shadow-md">
-            S
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+            <Image
+              src="/logo.png"
+              alt="Samadhan Logo"
+              width={60}
+              height={60}
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <div>

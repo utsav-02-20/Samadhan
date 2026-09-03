@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -87,8 +88,14 @@ export default function UniversityProjectsPage() {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+                <Image
+                  src="/logo.png"
+                  alt="Samadhan Logo"
+                  width={60}
+                  height={60}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div>
@@ -317,11 +324,10 @@ function ProjectCard({ project }) {
         </div>
 
         <span
-          className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
-            isNearCompletion
+          className={`rounded-full px-2.5 py-1 text-[10px] font-black ${isNearCompletion
               ? "bg-emerald-50 text-emerald-700"
               : "bg-blue-50 text-blue-700"
-          }`}
+            }`}
         >
           {project.status}
         </span>

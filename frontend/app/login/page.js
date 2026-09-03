@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   ArrowRight,
   Building2,
@@ -11,6 +11,8 @@ import {
   ChevronLeft,
 } from "lucide-react";
 
+import Logo from "@/components/ui/Logo";
+
 const roles = [
   {
     title: "Citizen",
@@ -18,7 +20,7 @@ const roles = [
     description:
       "Raise civic challenges, follow submissions and stay connected with their progress.",
     // href: "/login/citizen",
-    href:`/citizen/auth/sign-in`,
+    href: `/citizen/auth/sign-in`,
     icon: Users,
     accent: "bg-blue-50 text-blue-600",
     hover: "group-hover:bg-blue-600",
@@ -30,6 +32,7 @@ const roles = [
     description:
       "Review challenges, assign departments, approve solutions and oversee projects.",
     href: "/login/government",
+    //href: "/government/auth/sign-in",
     icon: Landmark,
     accent: "bg-indigo-50 text-indigo-600",
     hover: "group-hover:bg-indigo-600",
@@ -40,7 +43,8 @@ const roles = [
     short: "D",
     description:
       "Manage assigned challenges, execute projects and report implementation progress.",
-    href: "/login/department",
+    // href: "/login/department",
+    href: "/department/auth/sign-in",
     icon: Building2,
     accent: "bg-violet-50 text-violet-600",
     hover: "group-hover:bg-violet-600",
@@ -52,6 +56,7 @@ const roles = [
     description:
       "Discover civic challenges and collaborate on innovative solutions and projects.",
     href: "/login/university",
+    // href: "/university/auth/sign-in",
     icon: GraduationCap,
     accent: "bg-emerald-50 text-emerald-600",
     hover: "group-hover:bg-emerald-600",
@@ -63,6 +68,7 @@ const roles = [
     description:
       "Collaborate with Samadhan on projects, initiatives and meaningful civic impact.",
     href: "/login/partner",
+    //href: "/partner/auth/sign-in",
     icon: Handshake,
     accent: "bg-amber-50 text-amber-600",
     hover: "group-hover:bg-amber-600",
@@ -93,21 +99,7 @@ export default function LoginPage() {
 
         {/* Navbar */}
         <header className="flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-lg font-black text-white shadow-lg shadow-slate-950/15 transition group-hover:-translate-y-0.5">
-              S
-            </div>
-
-            <div>
-              <p className="text-lg font-bold tracking-tight">
-                Samadhan
-              </p>
-
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-400">
-                Civic Innovation
-              </p>
-            </div>
-          </Link>
+          <Logo href="/" subtitle="Civic Innovation" />
 
           <Link
             href="/"

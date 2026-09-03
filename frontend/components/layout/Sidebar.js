@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 const navigation = {
@@ -46,8 +47,14 @@ export default function Sidebar({ role = "government" }) {
       <div className="flex h-20 items-center border-b border-slate-100 px-6">
         <Link href="/" className="flex items-center gap-3">
 
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-lg font-bold text-white">
-            S
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+            <Image
+              src="/logo.png"
+              alt="Samadhan Logo"
+              width={60}
+              height={60}
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <div>
@@ -101,19 +108,17 @@ export default function Sidebar({ role = "government" }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
-                  active
+                className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${active
                     ? "bg-slate-950 text-white shadow-sm"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                }`}
+                  }`}
               >
 
                 <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-base ${
-                    active
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-base ${active
                       ? "bg-white/10 text-white"
                       : "bg-slate-100 text-slate-500 group-hover:bg-white"
-                  }`}
+                    }`}
                 >
                   {item.icon}
                 </span>

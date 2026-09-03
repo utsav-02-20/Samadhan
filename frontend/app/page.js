@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Building2,
@@ -71,8 +72,14 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-lg font-bold text-white shadow-lg shadow-slate-900/10">
-              S
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+              <Image
+                src="/logo.png"
+                alt="Samadhan Logo"
+                width={60}
+                height={60}
+                className="h-full w-full object-cover"
+              />
             </div>
 
             <div>
@@ -326,7 +333,7 @@ export default function HomePage() {
                 <div className="mt-6 border-t border-slate-100 pt-5 text-sm font-bold text-slate-900">
                   Open dashboard
                 </div>
-            
+
               </Link>
             );
           })}

@@ -14,63 +14,11 @@ import {
   Users,
 } from "lucide-react";
 
-const stats = [
-  {
-    title: "Total Challenges",
-    value: "128",
-    change: "+12 this month",
-    icon: FileText,
-  },
-  {
-    title: "Pending Review",
-    value: "24",
-    change: "Requires attention",
-    icon: Clock3,
-  },
-  {
-    title: "Accepted",
-    value: "67",
-    change: "+8 this month",
-    icon: CheckCircle2,
-  },
-  {
-    title: "Active Projects",
-    value: "31",
-    change: "Across departments",
-    icon: FolderKanban,
-  },
-];
+import Logo from "@/components/ui/Logo";
+import { GOVERNMENT_STATS, GOVERNMENT_RECENT_CHALLENGES as recentChallenges } from "@/data/demoData";
 
-const recentChallenges = [
-  {
-    id: "SAM-1024",
-    title: "Broken street lights in residential area",
-    department: "Public Works",
-    status: "UNDER_REVIEW",
-    submitted: "Today",
-  },
-  {
-    id: "SAM-1021",
-    title: "Garbage collection issue",
-    department: "Sanitation",
-    status: "SUBMITTED",
-    submitted: "Yesterday",
-  },
-  {
-    id: "SAM-1017",
-    title: "Water supply disruption",
-    department: "Water Department",
-    status: "ACCEPTED",
-    submitted: "2 days ago",
-  },
-  {
-    id: "SAM-1011",
-    title: "Damaged road near university",
-    department: "Public Works",
-    status: "ASSIGNED",
-    submitted: "3 days ago",
-  },
-];
+const govIconMap = { FileText, Clock3, CheckCircle2, FolderKanban };
+const stats = GOVERNMENT_STATS.map((s) => ({ ...s, icon: govIconMap[s.icon] || FileText }));
 
 const statusStyles = {
   SUBMITTED: "bg-slate-100 text-slate-600",
@@ -96,23 +44,7 @@ export default function GovernmentDashboard() {
 
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
 
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-lg font-black text-white">
-              S
-            </div>
-
-            <div>
-              <p className="font-black tracking-tight">
-                Samadhan
-              </p>
-
-              <p className="text-xs text-slate-400">
-                Government Portal
-              </p>
-            </div>
-
-          </div>
+          <Logo href="/" subtitle="Government Portal" />
 
           <div className="flex items-center gap-4">
 

@@ -12,52 +12,8 @@ import {
   Building2,
 } from "lucide-react";
 
-const reports = {
-  "SAM-1024": {
-    title: "Damaged Street Light",
-    category: "Street Lighting",
-    location: "Ward 12, Bhagalpur",
-    reportedOn: "28 August 2026",
-    department: "Municipal Electrical Department",
-    status: "In Progress",
-    description:
-      "Street light near the main road is not working, creating visibility and safety problems for residents during the night.",
-    updates: [
-      {
-        title: "Issue reported",
-        description: "Your complaint was successfully submitted.",
-        date: "28 Aug 2026",
-        completed: true,
-      },
-      {
-        title: "Issue verified",
-        description: "The complaint was reviewed and verified.",
-        date: "29 Aug 2026",
-        completed: true,
-      },
-      {
-        title: "Assigned to department",
-        description:
-          "The issue was assigned to the Municipal Electrical Department.",
-        date: "29 Aug 2026",
-        completed: true,
-      },
-      {
-        title: "Work in progress",
-        description:
-          "The department is currently working on resolving the issue.",
-        date: "30 Aug 2026",
-        completed: true,
-      },
-      {
-        title: "Resolved",
-        description: "Waiting for the department to complete the repair.",
-        date: "Pending",
-        completed: false,
-      },
-    ],
-  },
-};
+import Logo from "@/components/ui/Logo";
+import { REPORT_DETAILS_MOCK as reports } from "@/data/demoData";
 
 export default function ReportDetails({ params }) {
   const report = reports[params.id] || reports["SAM-1024"];
@@ -71,26 +27,7 @@ export default function ReportDetails({ params }) {
 
         <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
 
-          <Link
-            href="/citizen/dashboard"
-            className="flex items-center gap-3"
-          >
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
-            </div>
-
-            <div className="hidden sm:block">
-              <p className="text-sm font-black">
-                Samadhan
-              </p>
-
-              <p className="text-[10px] font-semibold text-slate-400">
-                Citizen Portal
-              </p>
-            </div>
-
-          </Link>
+          <Logo href="/citizen/dashboard" subtitle="Citizen Portal" />
 
           <nav className="ml-auto flex items-center gap-2">
 

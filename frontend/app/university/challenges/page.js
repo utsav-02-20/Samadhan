@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 
+// demo data for challenges
 const challenges = [
   {
     id: "SAM-1042",
@@ -208,8 +210,14 @@ export default function UniversityChallengesPage() {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+                <Image
+                  src="/logo.png"
+                  alt="Samadhan Logo"
+                  width={60}
+                  height={60}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div>
@@ -429,11 +437,10 @@ function ChallengeCard({ challenge }) {
               </span>
 
               <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-                  isOpen
+                className={`rounded-full px-2 py-0.5 text-[10px] font-black ${isOpen
                     ? "bg-emerald-50 text-emerald-700"
                     : "bg-slate-100 text-slate-500"
-                }`}
+                  }`}
               >
                 {challenge.status}
               </span>

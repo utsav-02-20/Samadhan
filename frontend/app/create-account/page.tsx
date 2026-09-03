@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Building2,
@@ -10,6 +11,8 @@ import {
   Sparkles,
   ChevronLeft,
 } from "lucide-react";
+
+import Logo from "@/components/ui/Logo";
 
 const roles = [
   {
@@ -26,7 +29,7 @@ const roles = [
     title: "Government",
     description:
       "Register a government account to oversee districts, approve projects and monitor public services.",
-    href: "/signup/government",
+    href: "/government/auth/sign-up",
     icon: Landmark,
     accent: "bg-indigo-50 text-indigo-600",
     hover: "group-hover:bg-indigo-600",
@@ -36,7 +39,7 @@ const roles = [
     title: "Department",
     description:
       "Create a department account to manage assigned complaints and provide implementation updates.",
-    href: "/signup/department",
+    href: "/department/auth/sign-up",
     icon: Building2,
     accent: "bg-violet-50 text-violet-600",
     hover: "group-hover:bg-violet-600",
@@ -46,7 +49,7 @@ const roles = [
     title: "University",
     description:
       "Register as a university to collaborate on civic innovation, research and solution development.",
-    href: "/signup/university",
+    href: "/university/auth/sign-up",
     icon: GraduationCap,
     accent: "bg-emerald-50 text-emerald-600",
     hover: "group-hover:bg-emerald-600",
@@ -56,7 +59,7 @@ const roles = [
     title: "Partner",
     description:
       "Create a partner account to contribute through CSR, NGOs and collaborative civic initiatives.",
-    href: "/signup/partner",
+    href: "/partner/auth/sign-up",
     icon: Handshake,
     accent: "bg-amber-50 text-amber-600",
     hover: "group-hover:bg-amber-600",
@@ -85,18 +88,7 @@ export default function CreateAccountPage() {
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-6 lg:px-8">
         {/* Header */}
         <header className="flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-lg font-black text-white shadow-lg shadow-slate-950/15 transition group-hover:-translate-y-0.5">
-              S
-            </div>
-
-            <div>
-              <p className="text-lg font-bold tracking-tight">Samadhan</p>
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-400">
-                Civic Innovation
-              </p>
-            </div>
-          </Link>
+          <Logo href="/" subtitle="Civic Innovation" />
 
           <Link
             href="/login"

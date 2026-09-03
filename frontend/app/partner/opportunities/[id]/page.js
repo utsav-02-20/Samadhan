@@ -18,6 +18,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 
+// demo data for opportunities
 const opportunities = {
   1: {
     title: "Smart City Traffic Optimization",
@@ -133,8 +134,14 @@ export default function OpportunityDetails({ params }) {
             className="flex items-center gap-3"
           >
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+              <Image
+                src="/logo.png"
+                alt="Samadhan Logo"
+                width={60}
+                height={60}
+                className="h-full w-full object-cover"
+              />
             </div>
 
             <div className="hidden sm:block">

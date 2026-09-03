@@ -28,6 +28,23 @@ const universitySchema = new mongoose.Schema(
         },
       },
     ],
+    projects: [
+      {
+        id: String,
+        title: String,
+        category: String,
+        leadResearcher: String,
+        budget: String,
+        status: {
+          type: String,
+          default: "IN_PROGRESS",
+        },
+        progressPercentage: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

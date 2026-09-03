@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -13,55 +13,9 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const reports = [
-  {
-    id: "SAM-1024",
-    title: "Broken street light",
-    category: "Infrastructure",
-    location: "Main Market Road",
-    status: "UNDER_REVIEW",
-    date: "28 Aug 2026",
-  },
-  {
-    id: "SAM-1018",
-    title: "Garbage accumulation",
-    category: "Sanitation",
-    location: "Sector 4 Community Park",
-    status: "ACCEPTED",
-    date: "24 Aug 2026",
-  },
-  {
-    id: "SAM-1007",
-    title: "Damaged road",
-    category: "Roads",
-    location: "University Road",
-    status: "RESOLVED",
-    date: "18 Aug 2026",
-  },
-];
+import Logo from "@/components/ui/Logo";
 
-const statusConfig = {
-  SUBMITTED: {
-    label: "Submitted",
-    icon: Clock3,
-    className: "bg-slate-100 text-slate-600",
-  },
-  UNDER_REVIEW: {
-    label: "Under review",
-    icon: AlertCircle,
-    className: "bg-amber-50 text-amber-700",
-  },
-  ACCEPTED: {
-    label: "Accepted",
-    icon: CheckCircle2,
-    className: "bg-blue-50 text-blue-700",
-  },
-  RESOLVED: {
-    label: "Resolved",
-    icon: CheckCircle2,
-    className: "bg-emerald-50 text-emerald-700",
-  },
-};
+import { CITIZEN_REPORTS as reports, REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
 
 export default function CitizenDashboard() {
   const pendingCount = reports.filter(
@@ -86,23 +40,7 @@ export default function CitizenDashboard() {
 
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-6 lg:px-8">
 
-          <Link href="/" className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
-            </div>
-
-            <div>
-              <p className="font-bold tracking-tight">
-                Samadhan
-              </p>
-
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Citizen Portal
-              </p>
-            </div>
-
-          </Link>
+          <Logo href="/" subtitle="Citizen Portal" />
 
           <div className="flex items-center gap-4">
 

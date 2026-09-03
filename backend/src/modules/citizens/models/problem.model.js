@@ -29,7 +29,7 @@ const problemSchema = new mongoose.Schema(
   {
     // Citizen who submitted the complaint
     citizenId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.Mixed,
       ref: "Citizen",
       required: true,
     },
