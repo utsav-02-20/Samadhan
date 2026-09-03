@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/nextjs";
 import { getUniversityChallenges, getUniversityProjects, triggerAITaskAllocation } from "@/services/university.service";
 
 // Commented out demo data:
@@ -163,12 +163,14 @@ export default function UniversityDashboard() {
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
             </Link>
 
-            <Link
-              href="/university/profile"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-black text-blue-700"
-            >
-              UB
-            </Link>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+                },
+              }}
+            />
 
           </div>
 

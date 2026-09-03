@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/nextjs";
 import { getGovernmentChallenges } from "@/services/government.service";
 import {
   ArrowLeft,
@@ -204,9 +204,14 @@ export default function GovernmentChallengesPage() {
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 

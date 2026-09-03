@@ -8,28 +8,41 @@ import {
   CheckCircle2,
   Clock3,
   FileText,
+  Globe,
   MapPin,
   Search,
   SlidersHorizontal,
+  User,
 } from "lucide-react";
 
 import Logo from "@/components/ui/Logo";
-import { useUser, useAuth } from "@clerk/nextjs";
-import { getCitizenHistory, toReportView } from "@/services/citizen.service";
+import { useUser, useAuth, UserButton } from "@clerk/nextjs";
+import { getCitizenHistory, getPublicFeed, toReportView } from "@/services/citizen.service";
 import { REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
 
 export default function MyReportsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
+  const [viewMode, setViewMode] = useState("MY_REPORTS"); // 'MY_REPORTS' | 'PUBLIC_FEED'
   const [reports, setReports] = useState([]);
   const { user } = useUser();
   const { getToken } = useAuth();
+
   useEffect(() => {
-    if (!user) return;
-    getToken().then((token) => getCitizenHistory(user.id, token || undefined))
-      .then((res) => setReports((res?.data || []).map(toReportView)))
-      .catch((err) => console.error("Could not load reports:", err));
-  }, [user, getToken]);
+    if (viewMode === "PUBLIC_FEED") {
+      getPublicFeed()
+        .then((res) => setReports((res?.data || []).map((item) => ({
+          ...toReportView(item),
+          submittedBy: undefined,
+        }))))
+        .catch((err) => console.error("Could not load public feed:", err));
+    } else {
+      if (!user) return;
+      getToken().then((token) => getCitizenHistory(user.id, token || undefined))
+        .then((res) => setReports((res?.data || []).map(toReportView)))
+        .catch((err) => console.error("Could not load reports:", err));
+    }
+  }, [user, getToken, viewMode]);
 
   const filteredReports = reports.filter((report) => {
     const searchableText =
@@ -71,26 +84,61 @@ export default function MyReportsPage() {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#401AD9]">
               Citizen Portal
             </p>
 
             <h1 className="mt-2 text-3xl font-black tracking-tight">
-              My Reports
+              {viewMode === "PUBLIC_FEED" ? "Community Civic Issues" : "My Reports"}
             </h1>
 
             <p className="mt-2 text-sm text-slate-500">
-              Track the civic issues you have reported.
+              {viewMode === "PUBLIC_FEED"
+                ? "Browse all community civic problems reported across districts (submitter identity hidden for privacy)."
+                : "Track the civic issues you have reported."}
             </p>
           </div>
 
-          <Link
-            href="/citizen/report"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold !text-white shadow-md transition hover:-translate-y-1 hover:bg-blue-700 hover:shadow-lg"
-          >
-            Report New Issue
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+
+            {/* View Mode Toggle Buttons */}
+            <div className="flex rounded-xl border border-indigo-200 bg-indigo-50/50 p-1 shadow-sm">
+
+              <button
+                onClick={() => setViewMode("MY_REPORTS")}
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-bold transition ${
+                  viewMode === "MY_REPORTS"
+                    ? "bg-royal-gradient text-white shadow-sm"
+                    : "text-slate-600 hover:text-[#401AD9]"
+                }`}
+              >
+                <User className="h-3.5 w-3.5" />
+                My Submissions
+              </button>
+
+              <button
+                onClick={() => setViewMode("PUBLIC_FEED")}
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-bold transition ${
+                  viewMode === "PUBLIC_FEED"
+                    ? "bg-royal-gradient text-white shadow-sm"
+                    : "text-slate-600 hover:text-[#401AD9]"
+                }`}
+              >
+                <Globe className="h-3.5 w-3.5" />
+                All Problems (Anonymous)
+              </button>
+
+            </div>
+
+            <Link
+              href="/citizen/report"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-royal-gradient px-5 py-2.5 text-xs font-bold !text-white shadow-md shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              Report Issue
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
+          </div>
 
         </div>
 

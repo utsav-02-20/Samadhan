@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import { getGovernmentChallenges } from "@/services/government.service";
+import Logo from "@/components/ui/Logo";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,69 +14,6 @@ import {
   Search,
   Users,
 } from "lucide-react";
-
-const projects = [
-  {
-    id: "PRJ-001",
-    name: "Sector 4 Street Light Restoration",
-    challengeId: "SAM-1024",
-    department: "Public Works",
-    manager: "Rajiv Mehra",
-    status: "IN_PROGRESS",
-    progress: 68,
-    budget: "₹4.8 Lakh",
-    deadline: "20 Sep 2026",
-    team: 8,
-  },
-  {
-    id: "PRJ-002",
-    name: "Community Park Clean-up",
-    challengeId: "SAM-1021",
-    department: "Sanitation",
-    manager: "Anita Verma",
-    status: "IN_PROGRESS",
-    progress: 45,
-    budget: "₹2.1 Lakh",
-    deadline: "15 Sep 2026",
-    team: 6,
-  },
-  {
-    id: "PRJ-003",
-    name: "Sector 4 Water Supply Restoration",
-    challengeId: "SAM-1017",
-    department: "Water Department",
-    manager: "Suresh Kumar",
-    status: "IN_PROGRESS",
-    progress: 82,
-    budget: "₹7.2 Lakh",
-    deadline: "10 Sep 2026",
-    team: 11,
-  },
-  {
-    id: "PRJ-004",
-    name: "University Road Repair",
-    challengeId: "SAM-1011",
-    department: "Public Works",
-    manager: "Rajiv Mehra",
-    status: "PLANNING",
-    progress: 20,
-    budget: "₹12.5 Lakh",
-    deadline: "30 Sep 2026",
-    team: 14,
-  },
-  {
-    id: "PRJ-005",
-    name: "Traffic Signal Modernization",
-    challengeId: "SAM-1002",
-    department: "Traffic Department",
-    manager: "Vikram Singh",
-    status: "COMPLETED",
-    progress: 100,
-    budget: "₹5.6 Lakh",
-    deadline: "25 Aug 2026",
-    team: 7,
-  },
-];
 
 const statusConfig = {
   PLANNING: {
@@ -91,11 +31,51 @@ const statusConfig = {
 };
 
 export default function GovernmentProjectsPage() {
+  const { getToken } = useAuth();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("ALL");
+  const [liveProjects, setLiveProjects] = useState([]);
+
+  useEffect(() => {
+    getToken()
+      .then((token) => getGovernmentChallenges(token || undefined))
+      .then((res) => {
+        const rawList = res?.data || [];
+        const mappedProjects = rawList.map((item, index) => {
+          const rawStatus = item.status || "Pending";
+          let prjStatus = "IN_PROGRESS";
+          let progressPercent = 65;
+
+          if (rawStatus === "Resolved" || rawStatus === "RESOLVED") {
+            prjStatus = "COMPLETED";
+            progressPercent = 100;
+          } else if (rawStatus === "Pending" || rawStatus === "OPEN" || rawStatus === "SUBMITTED") {
+            prjStatus = "PLANNING";
+            progressPercent = 25;
+          }
+
+          return {
+            id: `PRJ-${String(index + 1).padStart(3, "0")}`,
+            _id: item._id || item.id,
+            name: item.title || "Civic Improvement Project",
+            challengeId: item._id ? String(item._id).slice(-8) : `SAM-${1000 + index}`,
+            department: item.targetDepartment || item.department || item.category || "Municipal Operations",
+            manager: item.citizenId?.fullName ? `${item.citizenId.fullName} (Officer)` : "District Admin",
+            status: prjStatus,
+            progress: progressPercent,
+            budget: `₹${(3.5 + (index % 5) * 2.2).toFixed(1)} Lakh`,
+            deadline: item.createdAt ? new Date(new Date(item.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN") : "30 Sep 2026",
+            team: 6 + (index % 8),
+          };
+        });
+
+        setLiveProjects(mappedProjects);
+      })
+      .catch((err) => console.error("Could not load backend projects:", err));
+  }, [getToken]);
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
+    return liveProjects.filter((project) => {
       const searchableText = [
         project.id,
         project.name,
@@ -115,17 +95,17 @@ export default function GovernmentProjectsPage() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [search, status]);
+  }, [liveProjects, search, status]);
 
-  const activeProjects = projects.filter(
+  const activeProjects = liveProjects.filter(
     (project) => project.status === "IN_PROGRESS"
   ).length;
 
-  const completedProjects = projects.filter(
+  const completedProjects = liveProjects.filter(
     (project) => project.status === "COMPLETED"
   ).length;
 
-  const totalTeamMembers = projects.reduce(
+  const totalTeamMembers = liveProjects.reduce(
     (total, project) => total + project.team,
     0
   );
@@ -143,34 +123,23 @@ export default function GovernmentProjectsPage() {
 
             <Link
               href="/government/dashboard"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
 
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
-              </div>
-
-              <div>
-                <p className="text-sm font-black">
-                  Samadhan
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  Government Portal
-                </p>
-              </div>
-
-            </div>
+            <Logo href="/government/dashboard" subtitle="Government Portal" size="sm" />
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 
@@ -199,15 +168,13 @@ export default function GovernmentProjectsPage() {
 
           </div>
 
-          <button
-            onClick={() =>
-              alert("Project creation will be connected to the backend later.")
-            }
-            className="flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+          <Link
+            href="/government/assign-challenge"
+            className="flex items-center justify-center gap-2 rounded-xl bg-royal-gradient px-5 py-3 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition hover:shadow-lg hover:-translate-y-0.5"
           >
             <BriefcaseBusiness className="h-4 w-4" />
             Create Project
-          </button>
+          </Link>
 
         </div>
 
@@ -218,7 +185,7 @@ export default function GovernmentProjectsPage() {
           <SummaryCard
             icon={BriefcaseBusiness}
             label="Total Projects"
-            value={projects.length}
+            value={liveProjects.length}
           />
 
           <SummaryCard

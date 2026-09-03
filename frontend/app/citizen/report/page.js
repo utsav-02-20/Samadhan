@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 
-import { useUser, useAuth } from "@clerk/nextjs";
+import { useUser, useAuth, UserButton } from "@clerk/nextjs";
 import Logo from "@/components/ui/Logo";
 import { submitComplaint } from "@/services/citizen.service";
 
@@ -211,6 +211,15 @@ export default function ReportIssuePage() {
           </Link>
 
           <Logo href="/" size="sm" />
+
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 

@@ -117,7 +117,7 @@ export default function LoginPage() {
             {/* Heading */}
             <div className="mx-auto max-w-3xl text-center">
 
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-4 py-2 text-xs font-bold text-[#401AD9] shadow-sm">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50/80 px-4 py-2 text-xs font-bold text-[#401AD9] shadow-sm">
                 <Sparkles className="h-3.5 w-3.5" />
                 Secure platform access
               </div>

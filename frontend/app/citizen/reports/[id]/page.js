@@ -14,11 +14,53 @@ import {
 } from "lucide-react";
 
 import Logo from "@/components/ui/Logo";
+import { UserButton } from "@clerk/nextjs";
 import { REPORT_DETAILS_MOCK as reports } from "@/data/demoData";
 
 export default function ReportDetails({ params }) {
   const { id } = use(params);
   const report = reports[id] || reports["SAM-1024"];
+
+  // Dynamic DB status calculation for resolution timeline
+  const dbStatus = report.status || "Pending";
+  const dateStr = report.reportedOn || (report.createdAt ? new Date(report.createdAt).toLocaleDateString("en-IN") : "Recently");
+
+  const isPending = dbStatus === "Pending" || dbStatus === "SUBMITTED";
+  const isInProgress = dbStatus === "In Progress" || dbStatus === "UNDER_REVIEW" || dbStatus === "ACCEPTED";
+  const isResolved = dbStatus === "Resolved" || dbStatus === "RESOLVED";
+
+  const dynamicUpdates = [
+    {
+      title: "Issue reported",
+      description: "Your complaint was successfully submitted to the Samadhan platform.",
+      date: dateStr,
+      completed: true,
+    },
+    {
+      title: "Issue verified",
+      description: "The complaint was reviewed and verified by district administration.",
+      date: isInProgress || isResolved ? dateStr : "Pending",
+      completed: isInProgress || isResolved,
+    },
+    {
+      title: "Assigned to department",
+      description: `The issue was assigned to ${report.department || "Municipal Operations"}.`,
+      date: isInProgress || isResolved ? dateStr : "Pending",
+      completed: isInProgress || isResolved,
+    },
+    {
+      title: "Work in progress",
+      description: "The assigned department is currently executing ground resolution.",
+      date: isInProgress || isResolved ? dateStr : "Pending",
+      completed: isInProgress || isResolved,
+    },
+    {
+      title: "Resolved",
+      description: isResolved ? "Complaint successfully resolved on ground." : "Waiting for department resolution.",
+      date: isResolved ? dateStr : "Pending",
+      completed: isResolved,
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -35,24 +77,33 @@ export default function ReportDetails({ params }) {
 
             <Link
               href="/citizen/dashboard"
-              className="rounded-xl px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100"
+              className="rounded-xl px-4 py-2 text-xs font-bold text-slate-600 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               Dashboard
             </Link>
 
             <Link
               href="/citizen/reports"
-              className="rounded-xl bg-slate-950 px-4 py-2 text-xs font-black text-white"
+              className="rounded-xl border border-indigo-200 bg-indigo-50/80 px-4 py-2 text-xs font-black text-[#401AD9] transition hover:bg-indigo-100"
             >
               My Reports
             </Link>
 
             <Link
               href="/citizen/report"
-              className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"
+              className="rounded-xl bg-royal-gradient px-4 py-2 text-xs font-black !text-white shadow-md shadow-indigo-600/20 transition hover:shadow-lg hover:-translate-y-0.5"
             >
               Report Issue
             </Link>
+
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm ml-2",
+                },
+              }}
+            />
 
           </nav>
 
@@ -83,7 +134,7 @@ export default function ReportDetails({ params }) {
               <div className="flex flex-wrap items-center gap-2">
 
                 <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[9px] font-black text-blue-600">
-                  {report.status.toUpperCase()}
+                  {dbStatus.toUpperCase()}
                 </span>
 
                 <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[9px] font-black text-slate-500">
@@ -109,11 +160,11 @@ export default function ReportDetails({ params }) {
               <div>
 
                 <p className="text-[9px] font-black uppercase text-amber-600">
-                  Current status
+                  Live DB status
                 </p>
 
                 <p className="text-xs font-black text-amber-800">
-                  {report.status}
+                  {dbStatus}
                 </p>
 
               </div>
@@ -167,12 +218,12 @@ export default function ReportDetails({ params }) {
           </h2>
 
           <p className="mt-1 text-xs text-slate-400">
-            Track the progress of your reported issue.
+            Track the progress of your reported issue directly from database updates.
           </p>
 
           <div className="mt-7">
 
-            {report.updates.map((update, index) => (
+            {dynamicUpdates.map((update, index) => (
 
               <div
                 key={update.title}
@@ -181,11 +232,11 @@ export default function ReportDetails({ params }) {
 
                 {/* CONNECTING LINE */}
 
-                {index !== report.updates.length - 1 && (
+                {index !== dynamicUpdates.length - 1 && (
                   <div
                     className={`absolute left-[15px] top-8 h-full w-px ${
                       update.completed
-                        ? "bg-emerald-200"
+                        ? "bg-emerald-300"
                         : "bg-slate-200"
                     }`}
                   />
@@ -196,7 +247,7 @@ export default function ReportDetails({ params }) {
                 <div
                   className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
                     update.completed
-                      ? "bg-emerald-100"
+                      ? "bg-emerald-100 ring-2 ring-emerald-400/20"
                       : "bg-slate-100"
                   }`}
                 >
@@ -289,14 +340,14 @@ export default function ReportDetails({ params }) {
 
           <Link
             href="/citizen/reports"
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center text-xs font-black text-slate-700 hover:bg-slate-50"
+            className="rounded-xl border border-indigo-200 bg-white px-5 py-3 text-center text-xs font-bold text-[#401AD9] shadow-sm transition hover:bg-indigo-50 hover:shadow-md"
           >
             Back to reports
           </Link>
 
           <Link
             href="/citizen/report"
-            className="rounded-xl bg-slate-950 px-5 py-3 text-center text-xs font-black text-white hover:bg-slate-800"
+            className="rounded-xl bg-royal-gradient px-5 py-3 text-center text-xs font-bold !text-white shadow-md shadow-indigo-600/20 transition hover:shadow-lg hover:-translate-y-0.5"
           >
             Report another issue
           </Link>

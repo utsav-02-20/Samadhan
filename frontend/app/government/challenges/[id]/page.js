@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import Logo from "@/components/ui/Logo";
 import { getGovernmentChallenges, updateGovernmentChallengeStatus, assignChallengeToDepartment } from "@/services/government.service";
 import {
   ArrowLeft,
@@ -172,35 +173,24 @@ export default function GovernmentChallengeDetails() {
           <div className="flex items-center gap-4">
 
             <Link
-              href="/government/challenges"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+              href="/government/dashboard"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
 
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
-              </div>
-
-              <div>
-                <p className="text-sm font-black">
-                  Samadhan
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  Government Portal
-                </p>
-              </div>
-
-            </div>
+            <Logo href="/government/dashboard" subtitle="Government Portal" size="sm" />
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 
@@ -321,13 +311,21 @@ export default function GovernmentChallengeDetails() {
 
                 <InfoItem
                   label="Location"
-                  value={challenge.location}
+                  value={
+                    typeof challenge.location === "object" && challenge.location !== null
+                      ? (challenge.locality || challenge.district || `${challenge.location.latitude || 0}, ${challenge.location.longitude || 0}`)
+                      : String(challenge.location || challenge.locality || challenge.district || "General Locality")
+                  }
                   icon={MapPin}
                 />
 
                 <InfoItem
                   label="Submitted by"
-                  value={challenge.submittedBy}
+                  value={
+                    typeof challenge.submittedBy === "object" && challenge.submittedBy !== null
+                      ? (challenge.submittedBy.fullName || challenge.citizenId?.fullName || "Citizen")
+                      : String(challenge.submittedBy || challenge.citizenId?.fullName || "Citizen")
+                  }
                   icon={User}
                 />
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/nextjs";
 import { getGovernmentChallenges } from "@/services/government.service";
 import {
   AlertCircle,
@@ -18,10 +18,6 @@ import {
 } from "lucide-react";
 
 import Logo from "@/components/ui/Logo";
-import { GOVERNMENT_STATS } from "@/data/demoData";
-
-const govIconMap = { FileText, Clock3, CheckCircle2, FolderKanban };
-const stats = GOVERNMENT_STATS.map((s) => ({ ...s, icon: govIconMap[s.icon] || FileText }));
 
 const statusStyles = {
   SUBMITTED: "bg-slate-100 text-slate-600",
@@ -39,19 +35,58 @@ const statusLabels = {
 
 export default function GovernmentDashboard() {
   const { getToken } = useAuth();
+  const [allChallenges, setAllChallenges] = useState([]);
   const [recentChallenges, setRecentChallenges] = useState([]);
+
   useEffect(() => {
     getToken().then((token) => getGovernmentChallenges(token || undefined))
-      .then((res) => setRecentChallenges((res?.data || []).slice(0, 5).map((item) => ({
-        ...item,
-        id: item.id || item._id,
-        department: item.department || item.targetDepartment || "Unassigned",
-        submittedBy: item.submittedBy || "Government",
-        date: item.date || (item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : ""),
-        status: item.status === "OPEN" ? "SUBMITTED" : item.status,
-      }))))
+      .then((res) => {
+        const rawList = res?.data || [];
+        setAllChallenges(rawList);
+        setRecentChallenges(rawList.slice(0, 5).map((item) => ({
+          ...item,
+          id: item.id || item._id,
+          title: item.title || "Civic Complaint",
+          department: item.targetDepartment || item.department || "Unassigned",
+          submittedBy: item.citizenId?.fullName || "Citizen",
+          date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "Recently",
+          status: item.status === "OPEN" ? "SUBMITTED" : (item.status === "Pending" ? "SUBMITTED" : item.status),
+        })));
+      })
       .catch((err) => console.error("Could not load government data:", err));
   }, [getToken]);
+
+  const totalCount = allChallenges.length;
+  const pendingCount = allChallenges.filter((c) => c.status === "Pending" || c.status === "OPEN" || c.status === "SUBMITTED" || c.status === "UNDER_REVIEW").length;
+  const acceptedCount = allChallenges.filter((c) => c.status === "ACCEPTED" || c.status === "In Progress" || c.status === "ASSIGNED").length;
+  const resolvedCount = allChallenges.filter((c) => c.status === "Resolved" || c.status === "RESOLVED").length;
+
+  const dynamicStats = [
+    {
+      title: "Total Challenges",
+      value: String(totalCount),
+      change: "Live DB count",
+      icon: FileText,
+    },
+    {
+      title: "Pending Review",
+      value: String(pendingCount),
+      change: "Requires attention",
+      icon: Clock3,
+    },
+    {
+      title: "Accepted",
+      value: String(acceptedCount),
+      change: "Active in system",
+      icon: CheckCircle2,
+    },
+    {
+      title: "Resolved",
+      value: String(resolvedCount),
+      change: "Completed issues",
+      icon: FolderKanban,
+    },
+  ];
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
 
@@ -75,9 +110,14 @@ export default function GovernmentDashboard() {
               </p>
             </div>
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
-              GO
-            </div>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+                },
+              }}
+            />
 
           </div>
 
@@ -89,13 +129,13 @@ export default function GovernmentDashboard() {
 
         {/* Welcome section */}
 
-        <section className="rounded-3xl bg-slate-950 p-8 text-white shadow-xl">
+        <section className="rounded-3xl bg-royal-gradient p-8 text-white shadow-2xl shadow-indigo-600/25">
 
           <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
 
             <div>
 
-              <p className="text-sm font-semibold text-blue-300">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-100">
                 Government Administration
               </p>
 
@@ -103,7 +143,7 @@ export default function GovernmentDashboard() {
                 Good morning, Officer.
               </h1>
 
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-indigo-100">
                 Review civic challenges, coordinate departments and
                 monitor ongoing projects from one place.
               </p>
@@ -112,7 +152,7 @@ export default function GovernmentDashboard() {
 
             <Link
               href="/government/challenges"
-              className="group inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold !text-white shadow-lg transition duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-xl"
+              className="group inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold !text-[#401AD9] shadow-lg transition duration-300 hover:-translate-y-1 hover:bg-indigo-50"
             >
               Review Challenges
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
@@ -126,7 +166,7 @@ export default function GovernmentDashboard() {
 
         <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-          {stats.map((stat) => {
+          {dynamicStats.map((stat) => {
 
             const Icon = stat.icon;
 
@@ -417,16 +457,16 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-xl border border-slate-100 p-4 transition hover:border-slate-200 hover:bg-slate-50"
+      className="group flex items-center gap-4 rounded-xl border border-indigo-100/80 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50/40 hover:shadow-md"
     >
 
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-        <Icon className="h-4 w-4 text-slate-700" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-[#401AD9] transition-colors duration-300 group-hover:bg-[#401AD9] group-hover:text-white">
+        <Icon className="h-4 w-4" />
       </div>
 
       <div className="min-w-0 flex-1">
 
-        <p className="text-sm font-bold">
+        <p className="text-sm font-bold text-slate-900 transition-colors group-hover:text-[#401AD9]">
           {title}
         </p>
 
@@ -436,7 +476,7 @@ function QuickAction({
 
       </div>
 
-      <ArrowRight className="h-4 w-4 text-slate-300" />
+      <ArrowRight className="h-4 w-4 text-slate-300 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[#401AD9]" />
 
     </Link>
   );

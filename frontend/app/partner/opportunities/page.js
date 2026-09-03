@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { UserButton } from "@clerk/nextjs";
+import Logo from "@/components/ui/Logo";
 import {
   ArrowLeft,
   Building2,
@@ -89,13 +91,16 @@ export default function OpportunityDetails() {
       {/* Navbar */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/partner/dashboard" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Samadhan" width={40} height={40} />
-            <div>
-              <p className="font-black">Samadhan</p>
-              <p className="text-xs text-slate-500">Industry Partner</p>
-            </div>
-          </Link>
+          <Logo href="/partner/opportunities" subtitle="Partner Portal" size="sm" />
+
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
         </div>
       </header>
 

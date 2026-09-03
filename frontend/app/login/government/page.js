@@ -29,23 +29,23 @@ export default function GovernmentLogin() {
       <div className="grid min-h-screen lg:grid-cols-2">
 
         {/* Left panel */}
-        <section className="relative hidden overflow-hidden bg-slate-950 lg:flex">
+        <section className="relative hidden overflow-hidden bg-royal-gradient lg:flex">
 
-          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#401AD9]/30 blur-3xl" />
+          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-indigo-300/20 blur-3xl" />
 
-          <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl" />
+          <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-indigo-400/20 blur-3xl" />
 
-          <div className="relative flex w-full flex-col justify-between p-12 xl:p-16">
+          <div className="relative flex w-full flex-col justify-between p-12 xl:p-16 text-white">
 
             <Logo href="/" subtitle="Civic Innovation" />
 
             <div className="max-w-lg">
 
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-indigo-300 ring-1 ring-white/10">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md shadow-lg">
                 <Landmark className="h-7 w-7" />
               </div>
 
-              <p className="mt-8 text-sm font-bold uppercase tracking-[0.2em] text-indigo-300">
+              <p className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-indigo-100">
                 Government Portal
               </p>
 
@@ -53,19 +53,19 @@ export default function GovernmentLogin() {
                 Turning civic challenges into action.
               </h1>
 
-              <p className="mt-6 max-w-md text-base leading-7 text-slate-400">
+              <p className="mt-6 max-w-md text-base leading-7 text-indigo-100">
                 Review challenges, coordinate departments, assign projects
                 and monitor progress through one connected platform.
               </p>
 
-              <div className="mt-10 flex items-center gap-3 text-sm font-medium text-slate-300">
+              <div className="mt-10 flex items-center gap-3 text-sm font-medium text-indigo-100">
                 <ShieldCheck className="h-5 w-5 text-emerald-400" />
                 Secure government workspace
               </div>
 
             </div>
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-indigo-200 font-semibold">
               Samadhan Civic Innovation Platform
             </p>
 
@@ -182,7 +182,7 @@ export default function GovernmentLogin() {
 
               <button
                 type="submit"
-                className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 text-sm font-bold text-white shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-800"
+                className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-royal-gradient text-sm font-bold text-white shadow-lg shadow-indigo-600/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-indigo-600/40"
               >
                 Sign in
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />

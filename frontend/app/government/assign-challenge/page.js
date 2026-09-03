@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import Logo from "@/components/ui/Logo";
 import { assignChallengeToDepartment, getGovernmentChallenges } from "@/services/government.service";
 import {
   ArrowLeft,
@@ -168,34 +169,23 @@ export default function AssignChallengePage() {
 
             <Link
               href="/government/dashboard"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
 
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
-              </div>
-
-              <div>
-                <p className="text-sm font-black">
-                  Samadhan
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  Government Portal
-                </p>
-              </div>
-
-            </div>
+            <Logo href="/government/dashboard" subtitle="Government Portal" size="sm" />
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 
@@ -594,7 +584,7 @@ export default function AssignChallengePage() {
                 }
                 className={`mt-6 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition ${
                   selectedChallenge && selectedDepartment
-                    ? "bg-slate-950 text-white hover:bg-slate-800"
+                    ? "bg-royal-gradient text-white shadow-md shadow-indigo-600/25 hover:shadow-lg hover:shadow-indigo-600/35 hover:-translate-y-0.5"
                     : "cursor-not-allowed bg-slate-100 text-slate-400"
                 }`}
               >

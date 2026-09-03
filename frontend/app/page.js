@@ -69,22 +69,22 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#f8fafc] text-slate-950">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-indigo-100 bg-white/95 backdrop-blur-xl shadow-sm">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-royal-gradient p-0.5 shadow-md shadow-indigo-500/20">
               <Image
                 src="/logo.png"
                 alt="Samadhan Logo"
                 width={60}
                 height={60}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover rounded-[10px]"
               />
             </div>
 
             <div>
-              <div className="text-lg font-bold tracking-tight">Samadhan</div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <div className="text-lg font-black tracking-tight text-slate-900">Samadhan</div>
+              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#401AD9]">
                 Civic Innovation
               </div>
             </div>
@@ -93,28 +93,28 @@ export default function HomePage() {
           <nav className="hidden items-center gap-8 md:flex">
             <a
               href="#about"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+              className="text-sm font-semibold text-slate-600 transition hover:text-[#401AD9]"
             >
               About
             </a>
 
             <a
               href="#how-it-works"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+              className="text-sm font-semibold text-slate-600 transition hover:text-[#401AD9]"
             >
               How it works
             </a>
 
             <a
               href="#ecosystem"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+              className="text-sm font-semibold text-slate-600 transition hover:text-[#401AD9]"
             >
               Ecosystem
             </a>
 
             <Link
               href="/login"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+              className="text-sm font-semibold text-slate-600 transition hover:text-[#401AD9]"
             >
               Signup
             </Link>
@@ -122,7 +122,7 @@ export default function HomePage() {
 
           <Link
             href="/login"
-            className="rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold !text-white shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-800"
+            className="rounded-xl bg-royal-gradient px-5 py-2.5 text-sm font-bold !text-white shadow-lg shadow-indigo-600/25 transition duration-300 hover:shadow-indigo-600/40 hover:-translate-y-0.5"
           >
             Get started
           </Link>
@@ -161,7 +161,7 @@ export default function HomePage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/login"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-3.5 text-sm font-bold !text-white shadow-xl shadow-slate-950/15 transition hover:-translate-y-1 hover:bg-slate-800"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-royal-gradient px-6 py-3.5 text-sm font-bold !text-white shadow-xl shadow-indigo-600/25 transition duration-300 hover:-translate-y-1 hover:shadow-indigo-600/40"
               >
                 Explore platform
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
@@ -169,7 +169,7 @@ export default function HomePage() {
 
               <a
                 href="#ecosystem"
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-950 shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-md"
+                className="inline-flex items-center justify-center rounded-xl border border-indigo-200 bg-white px-6 py-3.5 text-sm font-bold text-[#401AD9] shadow-sm transition hover:-translate-y-1 hover:border-indigo-400 hover:shadow-md"
               >
                 View ecosystem
               </a>
@@ -399,7 +399,7 @@ export default function HomePage() {
 
       {/* Footer CTA */}
       <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 px-6 py-10 text-white shadow-lg sm:px-8">
+        <div className="relative overflow-hidden rounded-3xl bg-royal-gradient px-6 py-12 text-white shadow-2xl shadow-indigo-600/30 sm:px-10">
           {/* Decorative elements */}
           <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#401AD9]/20 blur-3xl" />
           <div className="absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-blue-600/20 blur-3xl" />
