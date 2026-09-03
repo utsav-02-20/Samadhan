@@ -128,6 +128,21 @@ export const getUniversityProjects = async (req, res, next) => {
 };
 
 import Problem from "../../citizens/models/problem.model.js";
+import { runAIBatchAllocation, autoAssignProblemToBestUniversity } from "../../../services/aiRecommendation.service.js";
+
+export const triggerAIAllocation = async (req, res, next) => {
+  try {
+    const { problemId } = req.body;
+    if (problemId) {
+      const result = await autoAssignProblemToBestUniversity(problemId);
+      return res.status(200).json({ success: true, message: "AI task allocation completed.", data: result });
+    }
+    const batchResult = await runAIBatchAllocation();
+    return res.status(200).json({ success: true, message: "AI batch allocation completed.", data: batchResult });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getUniversityChallenges = async (req, res, next) => {
   try {
