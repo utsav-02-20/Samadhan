@@ -24,24 +24,25 @@ const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
 const startServer = async () => {
-  try {
-    // Connect MongoDB
-    if (!MONGO_URI) {
-      throw new Error("MongoDB connection string is missing in .env");
-    }
+  // Start Express server first so Render/cloud platforms pass HTTP health checks
+  const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 
-    await mongoose.connect(MONGO_URI);
-    console.log("MongoDB Connected Successfully");
-
-    // Start Express server
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-
-  } catch (error) {
-    console.error("Server Startup Failed:", error.message);
-    process.exit(1);
+  // Connect MongoDB with retry / non-blocking catch
+  if (!MONGO_URI) {
+    console.error("MongoDB connection string is missing in environment variables.");
+    return;
   }
+
+  mongoose
+    .connect(MONGO_URI)
+    .then(() => {
+      console.log("MongoDB Connected Successfully");
+    })
+    .catch((err) => {
+      console.error("MongoDB Connection Warning (Retrying in background):", err.message);
+    });
 };
 
 startServer();
