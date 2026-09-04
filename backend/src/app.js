@@ -47,6 +47,13 @@ app.use("/api/v1", routes);
 /* Health Check                                                                */
 /* -------------------------------------------------------------------------- */
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Samadhan Backend API is Live & Connected Successfully",
+  });
+});
+
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
