@@ -10,6 +10,13 @@ import {
   CheckCircle2,
   CircleDot,
   Sparkles,
+  Mic,
+  PhoneCall,
+  Languages,
+  Cpu,
+  Globe,
+  Bot,
+  Radio,
 } from "lucide-react";
 
 const roles = [
@@ -110,6 +117,14 @@ export default function HomePage() {
               className="text-sm font-semibold text-slate-600 transition hover:text-[#401AD9]"
             >
               Ecosystem
+            </a>
+
+            <a
+              href="#roadmap"
+              className="text-sm font-semibold text-slate-600 transition hover:text-[#401AD9] flex items-center gap-1.5"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
+              AI Roadmap
             </a>
 
             <Link
@@ -393,6 +408,128 @@ export default function HomePage() {
                 <p className="mt-2 text-sm leading-6 text-slate-500">{text}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Future AI & Voice Goals Section */}
+      <section id="roadmap" className="relative overflow-hidden bg-slate-950 py-24 text-white">
+        {/* Glow Effects */}
+        <div className="pointer-events-none absolute -left-40 top-1/4 h-96 w-96 rounded-full bg-indigo-600/20 blur-[120px]" />
+        <div className="pointer-events-none absolute -right-40 bottom-1/4 h-96 w-96 rounded-full bg-blue-600/20 blur-[120px]" />
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-bold text-indigo-300 uppercase tracking-widest backdrop-blur-md">
+                <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                Future Targets & AI Vision
+              </div>
+
+              <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl text-white">
+                Next-Gen AI & Inclusive <br />
+                <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+                  Grievance Registration
+                </span>
+              </h2>
+
+              <p className="mt-4 text-lg text-slate-400">
+                Breaking digital and literacy barriers through state-of-the-art Voice AI, Speech NLP, and Automated Phone Calling.
+              </p>
+            </div>
+
+            <div className="shrink-0">
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm text-xs font-medium text-slate-300">
+                <Radio className="h-4 w-4 text-emerald-400 animate-pulse" />
+                Live R&D Phase — Coming Soon
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            {/* Card 1: Multi-lingual Voice & Speech */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10">
+              <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-indigo-500/10 blur-2xl transition group-hover:bg-indigo-500/20" />
+              
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 transition duration-300 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white">
+                <Mic className="h-7 w-7" />
+              </div>
+
+              <div className="mt-6 flex items-center gap-2">
+                <span className="rounded-md bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-300 border border-indigo-500/20">
+                  Speech AI & NLP
+                </span>
+              </div>
+
+              <h3 className="mt-3 text-xl font-bold text-white">
+                Voice & Multi-Lingual Speech Registration
+              </h3>
+
+              <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                Citizens can record voice notes or speak naturally in 12+ Indian regional languages. Advanced NLP transcribes, analyzes emotion, and extracts civic issues automatically.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-white/5">
+                <span className="text-xs text-slate-500 flex items-center gap-1"><Languages className="h-3.5 w-3.5 text-indigo-400" /> Regional Dialects</span>
+                <span className="text-xs text-slate-500 flex items-center gap-1"><Bot className="h-3.5 w-3.5 text-indigo-400" /> Speech-to-Text</span>
+              </div>
+            </div>
+
+            {/* Card 2: Phone Call Grievance System */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10">
+              <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-purple-500/10 blur-2xl transition group-hover:bg-purple-500/20" />
+
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 transition duration-300 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white">
+                <PhoneCall className="h-7 w-7" />
+              </div>
+
+              <div className="mt-6 flex items-center gap-2">
+                <span className="rounded-md bg-purple-500/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-purple-300 border border-purple-500/20">
+                  IVR & Offline Access
+                </span>
+              </div>
+
+              <h3 className="mt-3 text-xl font-bold text-white">
+                Phone Call Grievance Hotline
+              </h3>
+
+              <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                Enabling feature-phone users to lodge complaints via a simple phone call. AI voice agents handle toll-free calls, gather issue location, and log formal tickets into the Samadhan DB.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-white/5">
+                <span className="text-xs text-slate-500 flex items-center gap-1"><PhoneCall className="h-3.5 w-3.5 text-purple-400" /> Toll-free Hotline</span>
+                <span className="text-xs text-slate-500 flex items-center gap-1"><Globe className="h-3.5 w-3.5 text-purple-400" /> Zero Internet Needed</span>
+              </div>
+            </div>
+
+            {/* Card 3: AI Smart Routing & Predictive Dispatch */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-pink-500/50 hover:shadow-2xl hover:shadow-pink-500/10">
+              <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-pink-500/10 blur-2xl transition group-hover:bg-pink-500/20" />
+
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-600/20 border border-pink-500/30 text-pink-400 transition duration-300 group-hover:scale-110 group-hover:bg-pink-600 group-hover:text-white">
+                <Cpu className="h-7 w-7" />
+              </div>
+
+              <div className="mt-6 flex items-center gap-2">
+                <span className="rounded-md bg-pink-500/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-pink-300 border border-pink-500/20">
+                  Smart AI Routing
+                </span>
+              </div>
+
+              <h3 className="mt-3 text-xl font-bold text-white">
+                Automated Categorization & Translation
+              </h3>
+
+              <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                LLM intelligence translates local dialect complaints into standardized department action items, tags urgency, and auto-dispatches challenges to the exact municipal authority.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-white/5">
+                <span className="text-xs text-slate-500 flex items-center gap-1"><Cpu className="h-3.5 w-3.5 text-pink-400" /> Automated Dispatch</span>
+                <span className="text-xs text-slate-500 flex items-center gap-1"><Sparkles className="h-3.5 w-3.5 text-pink-400" /> Dialect Translation</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

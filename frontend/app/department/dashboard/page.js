@@ -23,12 +23,29 @@ import {
   DEPARTMENT_PROJECTS_DETAILED as projects,
 } from "@/data/departmentData";
 
+import { DEPARTMENT_CHALLENGES_MOCK } from "@/data/departmentData";
+
 export default function DepartmentDashboard() {
   const [challenges, setChallenges] = useState([]);
   useEffect(() => {
-    getDepartmentChallenges().then((res) => setChallenges((res?.data || []).map((item) => ({
-      ...item, id: item._id || item.id, status: item.status === "Pending" ? "ROUTED" : item.status === "In Progress" ? "IN_PROGRESS" : item.status, slaStatus: "ON_TRACK", location: item.locality || item.district || "General Locality"
-    })))).catch((error) => console.error("Could not load department dashboard:", error));
+    getDepartmentChallenges().then((res) => {
+      const dbList = (res?.data || []).map((item) => ({
+        ...item,
+        id: item._id || item.id,
+        title: item.title || "Civic Challenge",
+        status: item.status === "Pending" ? "ROUTED" : item.status === "In Progress" ? "IN_PROGRESS" : item.status.toUpperCase(),
+        slaStatus: "ON_TRACK",
+        location: item.locality || item.district || "General Locality",
+        category: item.category || "General",
+        description: item.description || "Civic issue submitted via Samadhan.",
+      }));
+
+      if (dbList.length > 0) {
+        setChallenges([...dbList, ...DEPARTMENT_CHALLENGES_MOCK]);
+      } else {
+        setChallenges(DEPARTMENT_CHALLENGES_MOCK);
+      }
+    }).catch(() => setChallenges(DEPARTMENT_CHALLENGES_MOCK));
   }, []);
   const pendingCount = challenges.filter((c) => c.status === "ROUTED" || c.status === "IN_PROGRESS").length;
   const atRiskCount = challenges.filter((c) => c.slaStatus === "AT_RISK").length;

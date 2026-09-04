@@ -16,23 +16,35 @@ import {
 } from "lucide-react";
 import { getDepartmentChallenges } from "@/services/department.service";
 
+import { DEPARTMENT_CHALLENGES_MOCK } from "@/data/departmentData";
+
 export default function DepartmentChallengesPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [challenges, setChallenges] = useState([]);
   useEffect(() => {
     getDepartmentChallenges()
-      .then((res) => setChallenges((res?.data || []).map((item) => ({
-        ...item,
-        id: item._id || item.id,
-        location: item.locality || item.district || "General Locality",
-        slaStatus: "ON_TRACK",
-        routedBy: "Government Portal",
-        slaDeadline: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "-",
-        applicationsCount: item.upvotes || 0,
-        status: item.status === "Pending" ? "ROUTED" : item.status === "In Progress" ? "IN_PROGRESS" : item.status.toUpperCase(),
-      }))))
-      .catch((error) => console.error("Could not load department challenges:", error));
+      .then((res) => {
+        const dbList = (res?.data || []).map((item) => ({
+          ...item,
+          id: item._id || item.id,
+          title: item.title || "Civic Challenge",
+          location: item.locality || item.district || "General Locality",
+          category: item.category || "General",
+          slaStatus: "ON_TRACK",
+          routedBy: "Government Portal",
+          slaDeadline: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "-",
+          applicationsCount: item.upvotes || 0,
+          status: item.status === "Pending" ? "ROUTED" : item.status === "In Progress" ? "IN_PROGRESS" : item.status.toUpperCase(),
+        }));
+
+        if (dbList.length > 0) {
+          setChallenges([...dbList, ...DEPARTMENT_CHALLENGES_MOCK]);
+        } else {
+          setChallenges(DEPARTMENT_CHALLENGES_MOCK);
+        }
+      })
+      .catch(() => setChallenges(DEPARTMENT_CHALLENGES_MOCK));
   }, []);
 
   const filtered = challenges.filter((item) => {
