@@ -112,6 +112,21 @@ const problemSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // Samadhan Setu AI Engine Metadata
+    priority: {
+      type: String,
+      enum: ["LOW", "NORMAL", "HIGH", "CRITICAL"],
+      default: "NORMAL",
+    },
+    aiPredictedCategory: { type: String, default: "" },
+    level1Category: { type: String, default: "" },
+    fineCategory: { type: String, default: "" },
+    aiConfidence: { type: Number, default: 0.0 },
+    predictedResolutionDays: { type: Number, default: 15 },
+    expectedResolutionDate: { type: String, default: "" },
+    aiRecommendedDepartment: { type: String, default: "" },
+    aiSource: { type: String, default: "" },
+
     assignedDepartmentId: { type: String, default: "" },
     decisionReason: { type: String, default: "" },
     milestones: [

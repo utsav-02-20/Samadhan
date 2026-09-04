@@ -108,3 +108,27 @@ export async function toggleUpvote(problemId: string, token?: string) {
     token,
   });
 }
+
+/**
+ * Real-time AI prediction preview: category, SLA, urgency, and recommended department.
+ * Connects directly to the Samadhan Setu AI engine.
+ */
+export async function previewAIAnalysis(payload: { title: string; description: string; district?: string }) {
+  try {
+    const aiUrl = process.env.NEXT_PUBLIC_AI_URL || "http://127.0.0.1:5005";
+    const res = await fetch(`${aiUrl}/api/v1/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        complaint_text: `${payload.title} ${payload.description}`.trim(),
+        location: payload.district || "General",
+      }),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    // Graceful offline fallback
+  }
+  return null;
+}

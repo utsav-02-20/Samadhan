@@ -14,33 +14,110 @@
 import Problem from "../modules/citizens/models/problem.model.js";
 import University from "../modules/university/models/university.model.js";
 
-// Read frontend client URL from environment variables
-export const CLIENT_URL = process.env.CLIENT_URL || process.env.AI_SERVICE_URL || "http://localhost:3000";
+// AI Service URL (FastAPI running on port 5005)
+export const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:5005";
+export const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 /**
- * 1. AI Categorizer & Severity Scoring
- * Analyzes citizen problem title & description text.
+ * Maps fine/parent CPGRAMS name to Problem model category enum.
  */
-export const categorizeProblemAI = (title = "", description = "") => {
-  const text = `${title} ${description}`.toLowerCase();
+export const mapToCategoryEnum = (name = "") => {
+  const n = (name || "").toLowerCase();
+  if (n.includes("road") || n.includes("highway") || n.includes("traffic") || n.includes("bridge")) return "Roads";
+  if (n.includes("water") || n.includes("borewell") || n.includes("drinking")) return "Water Supply";
+  if (n.includes("power") || n.includes("electric") || n.includes("wire") || n.includes("light")) return "Electricity";
+  if (n.includes("garbage") || n.includes("waste") || n.includes("trash")) return "Garbage";
+  if (n.includes("drain") || n.includes("sewer") || n.includes("sewage")) return "Drainage";
+  if (n.includes("health") || n.includes("hospital") || n.includes("medical") || n.includes("drug")) return "Healthcare";
+  if (n.includes("school") || n.includes("education") || n.includes("teacher")) return "Education";
+  if (n.includes("bus") || n.includes("train") || n.includes("transport") || n.includes("railway")) return "Public Transport";
+  if (n.includes("sanitat") || n.includes("clean")) return "Sanitation";
+  return "Other";
+};
 
-  let category = "Other";
-  if (text.includes("water") || text.includes("drain") || text.includes("borewell") || text.includes("pump")) {
-    category = "Water Supply";
-  } else if (text.includes("road") || text.includes("pothole") || text.includes("traffic") || text.includes("bridge")) {
-    category = "Roads";
-  } else if (text.includes("garbage") || text.includes("waste") || text.includes("clean") || text.includes("sanitation")) {
-    category = "Sanitation";
-  } else if (text.includes("light") || text.includes("electric") || text.includes("power") || text.includes("wire")) {
-    category = "Electricity";
+/**
+ * 1. AI Categorizer & Severity Scoring with Samadhan Setu AI Bridge
+ * Calls Python FastAPI service on port 5005 with heuristic fallback.
+ */
+export const categorizeProblemAI = async (title = "", description = "", district = "") => {
+  const text = `${title} ${description}`.trim();
+
+  // Try calling Python AI Service
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+    const response = await fetch(`${AI_SERVICE_URL}/api/v1/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        complaint_text: text,
+        location: district || "General Locality",
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const data = await response.json();
+      const catObj = data.category || {};
+      const slaObj = data.sla || {};
+      const allocObj = data.allocation || {};
+
+      const category = mapToCategoryEnum(catObj.fine_category_name || catObj.level_1_name || text);
+      const priority = slaObj.priority || "NORMAL";
+      const predictedResolutionDays = slaObj.predicted_resolution_days || 15;
+      const expectedResolutionDate = slaObj.expected_deadline || "";
+      const recommendedDepartment = allocObj.recommended_organization_name || allocObj.recommended_organization || "";
+
+      return {
+        category,
+        priority,
+        predictedResolutionDays,
+        expectedResolutionDate,
+        recommendedDepartment,
+        level1Category: catObj.level_1_category || "",
+        level1Name: catObj.level_1_name || "",
+        fineCategory: catObj.fine_category || "",
+        fineCategoryName: catObj.fine_category_name || "",
+        aiConfidence: catObj.confidence || 0.85,
+        aiComplexityScore: priority === "CRITICAL" ? 95 : priority === "HIGH" ? 75 : 45,
+        source: "samadhan_setu_ai_engine",
+      };
+    }
+  } catch (err) {
+    // Graceful offline fallback
+    console.warn("[AI Service] Note: Using offline heuristic fallback:", err.message);
   }
 
-  // Calculate AI Urgency / Complexity Score (0 - 100)
-  const lengthScore = Math.min(text.length / 5, 40);
-  const keywordScore = (text.includes("urgent") || text.includes("broken") || text.includes("danger")) ? 40 : 20;
-  const aiComplexityScore = Math.min(Math.round(lengthScore + keywordScore), 100);
+  // Heuristic Fallback
+  const lowerText = text.toLowerCase();
+  let fallbackCategory = "Other";
+  if (lowerText.includes("water") || lowerText.includes("drain") || lowerText.includes("borewell") || lowerText.includes("pump")) {
+    fallbackCategory = "Water Supply";
+  } else if (lowerText.includes("road") || lowerText.includes("pothole") || lowerText.includes("traffic") || lowerText.includes("bridge")) {
+    fallbackCategory = "Roads";
+  } else if (lowerText.includes("garbage") || lowerText.includes("waste") || lowerText.includes("clean") || lowerText.includes("sanitation")) {
+    fallbackCategory = "Sanitation";
+  } else if (lowerText.includes("light") || lowerText.includes("electric") || lowerText.includes("power") || lowerText.includes("wire")) {
+    fallbackCategory = "Electricity";
+  }
 
-  return { category, aiComplexityScore };
+  const isUrgent = lowerText.includes("urgent") || lowerText.includes("danger") || lowerText.includes("hazard") || lowerText.includes("emergency");
+  const priority = isUrgent ? "HIGH" : "NORMAL";
+  const predictedResolutionDays = isUrgent ? 5 : 15;
+  const deadlineDate = new Date();
+  deadlineDate.setDate(deadlineDate.getDate() + predictedResolutionDays);
+
+  return {
+    category: fallbackCategory,
+    priority,
+    predictedResolutionDays,
+    expectedResolutionDate: deadlineDate.toISOString().split("T")[0],
+    recommendedDepartment: "Municipal Services",
+    aiComplexityScore: isUrgent ? 70 : 40,
+    source: "heuristic_fallback",
+  };
 };
 
 /**
@@ -65,7 +142,7 @@ export const autoAssignProblemToBestUniversity = async (problemId) => {
   if (!problem) throw new Error("Problem not found");
 
   // Step A: Run AI Categorizer & Severity Scoring
-  const { category, aiComplexityScore } = categorizeProblemAI(problem.title, problem.description);
+  const { category, aiComplexityScore } = await categorizeProblemAI(problem.title, problem.description, problem.district);
   problem.category = category;
 
   // Step B: Fetch all registered universities and evaluate past performance

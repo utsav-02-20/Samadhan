@@ -380,6 +380,12 @@ export default function AssignChallengePage() {
                             {challenge.submittedBy}
                           </span>
 
+                          {challenge.aiRecommendedDepartment && (
+                            <span className="inline-flex items-center gap-1 rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700">
+                              ⚡ AI Suggested: {challenge.aiRecommendedDepartment}
+                            </span>
+                          )}
+
                         </div>
 
                       </div>
@@ -449,6 +455,18 @@ export default function AssignChallengePage() {
                     {selectedChallenge.location}
 
                   </div>
+
+                  {selectedChallenge.aiRecommendedDepartment && (
+                    <div className="mt-3 rounded-lg border border-blue-200 bg-white/90 p-2.5 text-xs text-blue-950">
+                      <div className="font-bold text-blue-800">⚡ AI Recommended Department:</div>
+                      <div className="font-semibold text-slate-800 mt-0.5">{selectedChallenge.aiRecommendedDepartment}</div>
+                      {selectedChallenge.predictedResolutionDays && (
+                        <div className="text-[11px] text-slate-500 mt-1">
+                          Estimated SLA: <span className="font-bold text-indigo-700">{selectedChallenge.predictedResolutionDays} Days</span> ({selectedChallenge.priority || 'NORMAL'} Priority)
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                 </div>
 
