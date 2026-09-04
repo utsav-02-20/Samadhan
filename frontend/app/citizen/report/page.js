@@ -174,7 +174,7 @@ export default function ReportIssuePage() {
 
             <Link
               href="/citizen/dashboard"
-              className="flex-1 rounded-xl bg-slate-950 py-3 text-sm font-bold text-white hover:bg-slate-800"
+              className="flex-1 rounded-xl bg-slate-950 py-3 text-sm font-bold !text-white hover:bg-slate-800"
             >
               Dashboard
             </Link>
