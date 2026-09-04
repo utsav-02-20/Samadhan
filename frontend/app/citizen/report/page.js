@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,12 +11,13 @@ import {
   Loader2,
   MapPin,
   Send,
+  Sparkles,
   X,
 } from "lucide-react";
 
 import { useUser, useAuth, UserButton } from "@clerk/nextjs";
 import Logo from "@/components/ui/Logo";
-import { submitComplaint } from "@/services/citizen.service";
+import { submitComplaint, previewAIAnalysis } from "@/services/citizen.service";
 
 const categories = [
   "Roads",
@@ -47,6 +48,36 @@ export default function ReportIssuePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [reportId, setReportId] = useState("");
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [analyzingAI, setAnalyzingAI] = useState(false);
+
+  useEffect(() => {
+    if ((title.length + description.length) < 10) {
+      setAiSuggestion(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setAnalyzingAI(true);
+      try {
+        const res = await previewAIAnalysis({ title, description, district });
+        if (res && res.status === "success") {
+          setAiSuggestion(res);
+          if (!category && res.category?.fine_category_name) {
+            const mapped = res.category.fine_category_name.toLowerCase();
+            if (mapped.includes("road") || mapped.includes("highway")) setCategory("Roads");
+            else if (mapped.includes("water") || mapped.includes("pipe")) setCategory("Water Supply");
+            else if (mapped.includes("light") || mapped.includes("power")) setCategory("Electricity");
+            else if (mapped.includes("waste") || mapped.includes("clean")) setCategory("Sanitation");
+          }
+        }
+      } catch (err) {
+        // quiet fallback
+      } finally {
+        setAnalyzingAI(false);
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [title, description, district]);
 
   function handlePhotoChange(event) {
     const file = event.target.files?.[0];
@@ -345,6 +376,44 @@ export default function ReportIssuePage() {
                   {description.length}/1000
                 </p>
 
+                {/* Samadhan Setu AI Radar Badge */}
+                {aiSuggestion && (
+                  <div className="mt-3 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/90 to-indigo-50/80 p-3.5 text-xs text-slate-800 shadow-sm transition-all animate-in fade-in">
+                    <div className="flex items-center justify-between font-bold">
+                      <span className="flex items-center gap-1.5 text-blue-700">
+                        <Sparkles className="h-3.5 w-3.5 text-blue-600 animate-spin" />
+                        AI Redressal Engine
+                      </span>
+                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+                        aiSuggestion.sla?.priority === 'CRITICAL'
+                          ? 'bg-rose-100 text-rose-700 ring-1 ring-rose-300'
+                          : aiSuggestion.sla?.priority === 'HIGH'
+                          ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-300'
+                          : 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300'
+                      }`}>
+                        {aiSuggestion.sla?.priority || 'NORMAL'} Priority
+                      </span>
+                    </div>
+
+                    <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                      <div>
+                        <span className="font-semibold text-slate-500">Auto Category: </span>
+                        <span className="font-bold text-slate-800">
+                          {aiSuggestion.category?.fine_category_name || aiSuggestion.category?.level_1_name || 'General Issue'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-500">Target SLA: </span>
+                        <span className="font-bold text-indigo-700">
+                          {aiSuggestion.sla?.predicted_resolution_days || 15} days
+                        </span>
+                        <span className="text-slate-400 ml-1">
+                          (by {aiSuggestion.sla?.expected_deadline || 'standard window'})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>

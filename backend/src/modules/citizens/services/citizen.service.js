@@ -23,6 +23,7 @@
 import Citizen from "../models/citizen.model.js";
 import Problem from "../models/problem.model.js";
 import cloudinary from "../../../config/cloudinary.js";
+import { categorizeProblemAI } from "../../../services/aiRecommendation.service.js";
 
 /* -------------------------------------------------------------------------- */
 /* Register Citizen                                                            */
@@ -74,7 +75,43 @@ export const createComplaint = async (
   files = []
 ) => {
   const images = await uploadImages(files);
-  return Problem.create({ citizenId, ...complaintData, images });
+
+  let aiData = {};
+  try {
+    const aiResult = await categorizeProblemAI(
+      complaintData.title,
+      complaintData.description,
+      complaintData.district
+    );
+    if (aiResult) {
+      aiData = {
+        priority: aiResult.priority || "NORMAL",
+        aiPredictedCategory: aiResult.category || "",
+        level1Category: aiResult.level1Category || "",
+        fineCategory: aiResult.fineCategory || "",
+        aiConfidence: aiResult.aiConfidence || 0.85,
+        predictedResolutionDays: aiResult.predictedResolutionDays || 15,
+        expectedResolutionDate: aiResult.expectedResolutionDate || "",
+        aiRecommendedDepartment: aiResult.recommendedDepartment || "",
+        aiSource: aiResult.source || "samadhan_setu_ai",
+      };
+      // Auto-assign category if not specified or set to Other
+      if (!complaintData.category || complaintData.category === "Other") {
+        if (aiResult.category) {
+          aiData.category = aiResult.category;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[Citizen Service] AI enrichment warning:", err.message);
+  }
+
+  return Problem.create({
+    citizenId,
+    ...complaintData,
+    ...aiData,
+    images,
+  });
 };
 
 /* -------------------------------------------------------------------------- */

@@ -4,3 +4,8 @@ python-dotenv
 pydantic
 google-generativeai
 httpx
+joblib
+scikit-learn
+pandas
+pyarrow
+numpy

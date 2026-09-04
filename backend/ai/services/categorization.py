@@ -6,11 +6,36 @@ from typing import Optional, Union
 try:
     from ..config import GEMINI_API_KEY, is_gemini_configured
     from ..schemas.problem import ProblemAnalysis, ProblemClassifyRequest
+    from ..models.fast_category_engine import FastCategoryEngine
+    from .sla_and_allocation import SLAAndAllocationEngine
 except (ImportError, ValueError):
     from config import GEMINI_API_KEY, is_gemini_configured
     from schemas.problem import ProblemAnalysis, ProblemClassifyRequest
+    from models.fast_category_engine import FastCategoryEngine
+    from services.sla_and_allocation import SLAAndAllocationEngine
 
 logger = logging.getLogger("samadhan_ai.categorization")
+
+_ml_engine = None
+_sla_engine = None
+
+def get_ml_engine():
+    global _ml_engine
+    if _ml_engine is None:
+        try:
+            _ml_engine = FastCategoryEngine()
+        except Exception as e:
+            logger.warning(f"Could not load FastCategoryEngine: {e}")
+    return _ml_engine
+
+def get_sla_engine():
+    global _sla_engine
+    if _sla_engine is None:
+        try:
+            _sla_engine = SLAAndAllocationEngine()
+        except Exception as e:
+            logger.warning(f"Could not load SLAAndAllocationEngine: {e}")
+    return _sla_engine
 
 # Jharkhand 24 districts for normalization
 JHARKHAND_DISTRICTS = [
@@ -208,13 +233,60 @@ def _deterministic_fallback(text: str, default_district: Optional[str] = None) -
     else:
         severity = "Medium"
 
+    # ML and SLA Model Predictions
+    ml = get_ml_engine()
+    sla_eng = get_sla_engine()
+
+    ml_parent_code = None
+    ml_fine_code = None
+    ml_dept = None
+    ml_conf = None
+    predicted_days = 15
+    deadline = None
+    priority = "NORMAL"
+
+    if ml is not None:
+        try:
+            pred = ml.predict(text)
+            if pred.get("status") == "success":
+                if domain == "Other" or not domain:
+                    domain = pred.get("parent_category_name", domain)
+                if subdomain == "General Civic Issue" or not subdomain:
+                    subdomain = pred.get("fine_category_name", subdomain)
+                ml_parent_code = pred.get("parent_category_code")
+                ml_fine_code = pred.get("fine_category_code")
+                ml_dept = pred.get("org_name")
+                ml_conf = pred.get("parent_confidence")
+        except Exception as e:
+            logger.debug(f"ML predict fallback warning: {e}")
+
+    if sla_eng is not None:
+        try:
+            sla_info = sla_eng.predict_sla(text, parent_code=ml_parent_code, fine_code=ml_fine_code, district=district)
+            predicted_days = sla_info.get("predicted_resolution_days", 15)
+            deadline = sla_info.get("expected_deadline")
+            priority = sla_info.get("priority", "NORMAL")
+            if priority == "CRITICAL":
+                severity = "Critical"
+            elif priority == "HIGH" and severity != "Critical":
+                severity = "High"
+        except Exception:
+            pass
+
     return ProblemAnalysis(
         domain=domain,
         subdomain=subdomain,
         required_skills=skills,
         district=district,
         severity=severity,
-        is_rnd=is_rnd
+        is_rnd=is_rnd,
+        parent_category_code=ml_parent_code,
+        fine_category_code=ml_fine_code,
+        department=ml_dept,
+        confidence=ml_conf,
+        predicted_resolution_days=predicted_days,
+        expected_deadline=deadline,
+        priority=priority
     )
 
 

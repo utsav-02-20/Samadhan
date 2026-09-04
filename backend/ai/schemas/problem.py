@@ -33,6 +33,13 @@ class ProblemAnalysis(BaseModel):
     district: Optional[str] = Field(None, description="The district related to the problem, if identified.")
     severity: str = Field(default="Medium", description="The severity level: Low, Medium, High, or Critical.")
     is_rnd: bool = Field(..., description="Indicates whether the problem requires R&D/scientific innovation (True) or is routine civic maintenance (False).")
+    parent_category_code: Optional[str] = Field(None, description="CPGRAMS parent category code")
+    fine_category_code: Optional[str] = Field(None, description="CPGRAMS subcategory code")
+    department: Optional[str] = Field(None, description="Recommended government department or ministry")
+    confidence: Optional[float] = Field(None, description="Model prediction confidence score")
+    predicted_resolution_days: Optional[int] = Field(None, description="Estimated resolution duration in days")
+    expected_deadline: Optional[str] = Field(None, description="Estimated completion date (ISO format)")
+    priority: Optional[str] = Field(None, description="Action priority level: CRITICAL, HIGH, NORMAL")
 
     @field_validator("severity", mode="before")
     @classmethod
