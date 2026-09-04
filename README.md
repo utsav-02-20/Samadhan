@@ -12,6 +12,7 @@
 |--------|------|
 | **[Utsav Kumar](https://github.com/utsav-02-20)** |
 | **[Prince Verma](https://github.com/princeVerma73)** |
+| **[Piyush Singh ](https://github.com/piyush30007)** |
 
 
 ---
@@ -19,10 +20,6 @@
 ## 📖 Overview
 
 **Samadhan (समाधान)** is a unified civic governance platform that digitizes the complete lifecycle of public issue resolution. It enables collaboration between citizens, government departments, universities, and industry partners while ensuring transparency, accountability, and real-time tracking.
-
-*Frontend Deployment* : https://samadhan-1-xsc8.onrender.com
-*Backend API* : https://samadhan-2-4ogv.onrender.com
-*AI Service* : https://samadhan-3-5nsm.onrender.com
 
 ---
 
