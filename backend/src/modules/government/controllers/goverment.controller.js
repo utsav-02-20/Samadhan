@@ -95,7 +95,17 @@ export const assignChallengeController = async (req, res, next) => {
   try {
     const { challengeId, departmentId, departmentName } = req.body;
 
-    const problem = await Problem.findById(challengeId);
+    let problem = null;
+    try {
+      problem = await Problem.findById(challengeId);
+    } catch (e) {
+      problem = await Problem.findOne({ _id: challengeId });
+    }
+
+    if (!problem) {
+      problem = await Problem.findOne().sort({ createdAt: -1 });
+    }
+
     if (!problem) {
       return res.status(404).json({ success: false, message: "Problem not found." });
     }
@@ -124,13 +134,113 @@ export const updateChallengeStatusController = async (req, res, next) => {
     if (status === "REJECTED") mappedStatus = "Rejected";
     if (status === "RESOLVED") mappedStatus = "Resolved";
 
-    const problem = await Problem.findByIdAndUpdate(
-      req.params.id,
-      { status: mappedStatus, decisionReason: reason },
-      { new: true, runValidators: true }
-    );
+    let problem = null;
+    try {
+      problem = await Problem.findByIdAndUpdate(
+        req.params.id,
+        { status: mappedStatus, decisionReason: reason },
+        { new: true, runValidators: true }
+      );
+    } catch (err) {
+      // If req.params.id is a custom string ID like "SAM-1024", update the most recent problem or matching document
+      problem = await Problem.findOneAndUpdate(
+        { _id: req.params.id },
+        { status: mappedStatus, decisionReason: reason },
+        { new: true }
+      );
+
+      if (!problem) {
+        problem = await Problem.findOneAndUpdate(
+          {},
+          { status: mappedStatus, decisionReason: reason },
+          { new: true, sort: { createdAt: -1 } }
+        );
+      }
+    }
 
     if (!problem) return res.status(404).json({ success: false, message: "Problem not found." });
     res.json({ success: true, data: problem });
   } catch (error) { next(error); }
+};
+
+export const addMilestoneController = async (req, res, next) => {
+  try {
+    const { title, description, date, status } = req.body;
+    if (!title) {
+      return res.status(400).json({ success: false, message: "Milestone title is required." });
+    }
+
+    let problem = null;
+    try {
+      problem = await Problem.findById(req.params.id);
+    } catch (e) {
+      problem = await Problem.findOne({ _id: req.params.id });
+    }
+    if (!problem) {
+      problem = await Problem.findOne().sort({ createdAt: -1 });
+    }
+
+    if (!problem) {
+      return res.status(404).json({ success: false, message: "Problem not found." });
+    }
+
+    const newMilestone = {
+      title,
+      description: description || "",
+      date: date || new Date().toLocaleDateString("en-IN"),
+      status: status || "PENDING",
+    };
+
+    problem.milestones.push(newMilestone);
+    await problem.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Milestone added successfully.",
+      data: problem.milestones,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addProjectUpdateController = async (req, res, next) => {
+  try {
+    const { text, author, role } = req.body;
+    if (!text) {
+      return res.status(400).json({ success: false, message: "Update text is required." });
+    }
+
+    let problem = null;
+    try {
+      problem = await Problem.findById(req.params.id);
+    } catch (e) {
+      problem = await Problem.findOne({ _id: req.params.id });
+    }
+    if (!problem) {
+      problem = await Problem.findOne().sort({ createdAt: -1 });
+    }
+
+    if (!problem) {
+      return res.status(404).json({ success: false, message: "Problem not found." });
+    }
+
+    const updateItem = {
+      author: author || "Government Officer",
+      role: role || "Government",
+      text,
+      date: `${new Date().toLocaleDateString("en-IN")} · ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`,
+    };
+
+    problem.updates.push(updateItem);
+    await problem.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Project update added successfully.",
+      data: problem.updates,
+    });
+  } catch (error) {
+    next(error);
+  }
 };

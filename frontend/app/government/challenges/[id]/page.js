@@ -321,11 +321,7 @@ export default function GovernmentChallengeDetails() {
 
                 <InfoItem
                   label="Submitted by"
-                  value={
-                    typeof challenge.submittedBy === "object" && challenge.submittedBy !== null
-                      ? (challenge.submittedBy.fullName || challenge.citizenId?.fullName || "Citizen")
-                      : String(challenge.submittedBy || challenge.citizenId?.fullName || "Citizen")
-                  }
+                  value="Anonymous Citizen"
                   icon={User}
                 />
 
@@ -624,17 +620,17 @@ export default function GovernmentChallengeDetails() {
 
               <div className="mt-5 flex items-center gap-3">
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
-                  RS
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600">
+                  AC
                 </div>
 
                 <div>
                   <p className="text-sm font-bold">
-                    {challenge.submittedBy}
+                    Anonymous Citizen
                   </p>
 
                   <p className="mt-1 text-xs text-slate-400">
-                    Citizen
+                    Citizen Submitter (Identity Protected)
                   </p>
                 </div>
 

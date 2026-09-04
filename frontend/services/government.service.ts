@@ -43,3 +43,27 @@ export async function getGovernmentProfile(id: string, token?: string) {
     token,
   });
 }
+
+export async function addProjectMilestone(
+  id: string,
+  payload: { title: string; description?: string; date?: string; status?: string },
+  token?: string
+) {
+  return apiFetch(`/government/challenges/${id}/milestones`, {
+    method: "POST",
+    body: payload,
+    token,
+  });
+}
+
+export async function addProjectUpdate(
+  id: string,
+  payload: { text: string; author?: string; role?: string },
+  token?: string
+) {
+  return apiFetch(`/government/challenges/${id}/updates`, {
+    method: "POST",
+    body: payload,
+    token,
+  });
+}

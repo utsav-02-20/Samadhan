@@ -114,6 +114,22 @@ const problemSchema = new mongoose.Schema(
     },
     assignedDepartmentId: { type: String, default: "" },
     decisionReason: { type: String, default: "" },
+    milestones: [
+      {
+        title: { type: String, required: true },
+        description: { type: String, default: "" },
+        status: { type: String, enum: ["PENDING", "IN_PROGRESS", "COMPLETED"], default: "PENDING" },
+        date: { type: String, default: "" },
+      },
+    ],
+    updates: [
+      {
+        author: { type: String, default: "Government Officer" },
+        role: { type: String, default: "Government" },
+        text: { type: String, required: true },
+        date: { type: String, default: "" },
+      },
+    ],
   },
   {
     timestamps: true,
