@@ -124,14 +124,23 @@ export default function GovernmentChallengesPage() {
   const [status, setStatus] = useState("ALL");
   useEffect(() => {
     getGovernmentChallenges()
-      .then((res) => setLiveChallenges((res?.data || []).map((item) => ({
-        ...item,
-        id: item.id || item._id,
-        department: item.targetDepartment || "Unassigned",
-        date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "",
-        status: item.status === "Pending" ? "SUBMITTED" : item.status === "In Progress" ? "ASSIGNED" : item.status,
-      }))))
-      .catch((err) => { setLoadError(err.message || "Could not load challenges"); console.error(err); });
+      .then((res) => {
+        const items = res?.data || [];
+        if (items && items.length > 0) {
+          setLiveChallenges(items.map((item) => ({
+            ...item,
+            id: item.id || item._id,
+            department: item.targetDepartment || "Unassigned",
+            date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "",
+            status: item.status === "Pending" ? "SUBMITTED" : item.status === "In Progress" ? "ASSIGNED" : item.status,
+          })));
+        } else {
+          setLiveChallenges(initialChallenges);
+        }
+      })
+      .catch(() => {
+        setLiveChallenges(initialChallenges);
+      });
   }, []);
   const [priority, setPriority] = useState("ALL");
 

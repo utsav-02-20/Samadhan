@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Clock3,
   FileText,
+  Inbox,
   MapPin,
   Plus,
   ShieldCheck,
@@ -17,7 +18,7 @@ import {
 import Logo from "@/components/ui/Logo";
 import { useCitizenAutoRegister } from "@/hooks/useCitizen";
 import { useUser, useAuth, UserButton } from "@clerk/nextjs";
-import { getCitizenHistory, toReportView } from "@/services/citizen.service";
+import { getCitizenHistory, getPublicFeed, toReportView } from "@/services/citizen.service";
 
 import { REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
 
@@ -27,10 +28,31 @@ export default function CitizenDashboard() {
   const { getToken } = useAuth();
   const [reports, setReports] = useState([]);
   useEffect(() => {
-    if (!user) return;
-    getToken().then((token) => getCitizenHistory(user.id, token || undefined))
-      .then((res) => setReports((res?.data || []).map(toReportView)))
-      .catch((err) => console.error("Could not load reports:", err));
+    async function loadReports() {
+      try {
+        const token = user ? await getToken() : undefined;
+        const historyRes = user ? await getCitizenHistory(user.id, token || undefined).catch(() => null) : null;
+        const feedRes = await getPublicFeed().catch(() => null);
+        
+        const historyData = historyRes?.data || [];
+        const feedData = feedRes?.data || [];
+        const combined = [...historyData, ...feedData];
+
+        if (combined.length > 0) {
+          const uniqueMap = new Map();
+          combined.forEach((item) => {
+            const id = String(item._id || item.id);
+            if (!uniqueMap.has(id)) {
+              uniqueMap.set(id, toReportView(item));
+            }
+          });
+          setReports(Array.from(uniqueMap.values()));
+        }
+      } catch (err) {
+        console.warn("Dashboard load fallback:", err.message);
+      }
+    }
+    loadReports();
   }, [user, getToken]);
   const pendingCount = reports.filter(
     (report) =>
@@ -57,6 +79,14 @@ export default function CitizenDashboard() {
           <Logo href="/" subtitle="Citizen Portal" />
 
           <div className="flex items-center gap-4">
+
+            <Link
+              href="/citizen/inbox"
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-[#401AD9] hover:text-[#401AD9] shadow-sm"
+            >
+              <Inbox className="h-4 w-4 text-[#401AD9]" />
+              Inbox
+            </Link>
 
             <Link
               href="/citizen/report"

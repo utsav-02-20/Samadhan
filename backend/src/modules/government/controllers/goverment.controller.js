@@ -112,6 +112,7 @@ export const assignChallengeController = async (req, res, next) => {
 
     problem.status = "In Progress";
     problem.assignedDepartmentId = departmentId || departmentName || "";
+    problem.targetDepartment = departmentName || departmentId || "";
     await problem.save();
 
     return res.status(200).json({
@@ -146,19 +147,29 @@ export const updateChallengeStatusController = async (req, res, next) => {
       problem = await Problem.findOneAndUpdate(
         { _id: req.params.id },
         { status: mappedStatus, decisionReason: reason },
-        { new: true }
+        { returnDocument: "after" }
       );
 
       if (!problem) {
         problem = await Problem.findOneAndUpdate(
           {},
           { status: mappedStatus, decisionReason: reason },
-          { new: true, sort: { createdAt: -1 } }
+          { returnDocument: "after", sort: { createdAt: -1 } }
         );
       }
     }
 
     if (!problem) return res.status(404).json({ success: false, message: "Problem not found." });
+
+    if (status === "NEEDS_INFO" && reason) {
+      problem.infoRequests.push({
+        question: reason,
+        requestedAt: new Date(),
+        status: "PENDING",
+      });
+      await problem.save();
+    }
+
     res.json({ success: true, data: problem });
   } catch (error) { next(error); }
 };

@@ -113,6 +113,7 @@ const problemSchema = new mongoose.Schema(
       default: 0,
     },
     assignedDepartmentId: { type: String, default: "" },
+    targetDepartment: { type: String, default: "" },
     decisionReason: { type: String, default: "" },
     milestones: [
       {
@@ -120,6 +121,15 @@ const problemSchema = new mongoose.Schema(
         description: { type: String, default: "" },
         status: { type: String, enum: ["PENDING", "IN_PROGRESS", "COMPLETED"], default: "PENDING" },
         date: { type: String, default: "" },
+      },
+    ],
+    infoRequests: [
+      {
+        question: { type: String, required: true },
+        requestedAt: { type: Date, default: Date.now },
+        reply: { type: String, default: "" },
+        repliedAt: { type: Date },
+        status: { type: String, enum: ["PENDING", "REPLIED"], default: "PENDING" },
       },
     ],
     updates: [

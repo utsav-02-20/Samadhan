@@ -21,8 +21,7 @@ import {
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { useAuth, UserButton } from "@clerk/nextjs";
-import { getUniversityChallenges, getUniversityProjects, triggerAITaskAllocation } from "@/services/university.service";
+import { getUniversityChallenges, getUniversityProjects, getUniversityProfile, triggerAITaskAllocation } from "@/services/university.service";
 
 // Commented out demo data:
 // const stats = [...];
@@ -32,8 +31,16 @@ import { getUniversityChallenges, getUniversityProjects, triggerAITaskAllocation
 export default function UniversityDashboard() {
   const [challenges, setChallenges] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [institutionName, setInstitutionName] = useState("IIIT Bhagalpur");
 
   useEffect(() => {
+    getUniversityProfile()
+      .then((res) => {
+        const name = res?.data?.name || res?.profile?.name || res?.data?.university;
+        if (name) setInstitutionName(name);
+      })
+      .catch(() => {});
+
     Promise.all([getUniversityChallenges(), getUniversityProjects()])
       .then(([chalRes, projRes]) => {
         setChallenges((chalRes?.data || []).map((item) => ({
@@ -148,6 +155,12 @@ export default function UniversityDashboard() {
               label="Submissions"
             />
 
+            <NavItem
+              href="/university/profile"
+              icon={Building2}
+              label="Profile"
+            />
+
           </nav>
 
           {/* RIGHT SIDE */}
@@ -163,14 +176,13 @@ export default function UniversityDashboard() {
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
             </Link>
 
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
-                },
-              }}
-            />
+            <Link
+              href="/university/profile"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-xs font-black text-white hover:bg-blue-700 shadow-sm"
+              title="University Account Profile"
+            >
+              UB
+            </Link>
 
           </div>
 
@@ -193,7 +205,7 @@ export default function UniversityDashboard() {
             </p>
 
             <h1 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">
-              Good morning, IIIT Bhagalpur.
+              Good morning, {institutionName}.
             </h1>
 
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">

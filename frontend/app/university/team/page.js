@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useAuth } from "@clerk/nextjs";
+import { getUniversityTeam, addUniversityTeamMember, getTeams } from "@/services/university.service";
 import {
   ArrowLeft,
   UserPlus,
@@ -11,11 +13,13 @@ import {
   ShieldCheck,
   Trash2,
   Search,
-  MoreVertical,
+  Building2,
+  FileCode,
+  ExternalLink,
   CheckCircle2,
+  Layers,
 } from "lucide-react";
 
-// demo data for team members
 const initialMembers = [
   {
     id: 1,
@@ -44,19 +48,12 @@ const initialMembers = [
     status: "ACTIVE",
     initials: "RM",
   },
-  {
-    id: 4,
-    name: "Ananya Jain",
-    email: "ananya@university.edu",
-    role: "Data Analyst",
-    project: "Road Safety Analytics",
-    status: "ACTIVE",
-    initials: "AJ",
-  },
 ];
 
 export default function UniversityTeamPage() {
+  const { getToken } = useAuth();
   const [members, setMembers] = useState(initialMembers);
+  const [registeredTeams, setRegisteredTeams] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
 
@@ -64,18 +61,56 @@ export default function UniversityTeamPage() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("Team Member");
 
+  useEffect(() => {
+    getToken()
+      .then((token) => getUniversityTeam(token || undefined))
+      .then((res) => {
+        const list = res?.data || [];
+        if (list.length > 0) {
+          setMembers(
+            list.map((m, idx) => ({
+              id: m._id || idx + 1,
+              name: m.name,
+              email: m.email,
+              role: m.role || "Researcher",
+              project: m.project || "Road Safety Analytics",
+              status: m.status || "ACTIVE",
+              initials: m.name
+                .split(" ")
+                .map((w) => w[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase(),
+            }))
+          );
+        }
+      })
+      .catch((err) => console.warn("Could not load university team from backend:", err.message));
+
+    // Fetch registered teams & solutions from DB
+    getTeams()
+      .then((res) => {
+        if (res?.data && res.data.length > 0) {
+          setRegisteredTeams(res.data);
+        } else {
+          // Check local storage
+          const keys = Object.keys(localStorage).filter((k) => k.startsWith("team_sub_"));
+          const localList = keys.map((k) => JSON.parse(localStorage.getItem(k)));
+          setRegisteredTeams(localList);
+        }
+      })
+      .catch(() => {});
+  }, [getToken]);
+
   const filteredMembers = members.filter((member) => {
     const text = `${member.name} ${member.email} ${member.role} ${member.project}`;
-
     return text.toLowerCase().includes(search.toLowerCase());
   });
 
-  function addMember(e) {
+  async function addMember(e) {
     e.preventDefault();
 
-    if (!name.trim() || !email.trim()) {
-      return;
-    }
+    if (!name.trim() || !email.trim()) return;
 
     const initials = name
       .split(" ")
@@ -89,12 +124,21 @@ export default function UniversityTeamPage() {
       name,
       email,
       role,
-      project: "Not assigned",
+      project: "Smart Waste Collection System",
       status: "ACTIVE",
       initials,
     };
 
-    setMembers([...members, newMember]);
+    try {
+      const token = await getToken();
+      await addUniversityTeamMember(
+        { name, email, role, project: "Smart Waste Collection System" },
+        token || undefined
+      );
+      setMembers([...members, newMember]);
+    } catch (err) {
+      setMembers([...members, newMember]);
+    }
 
     setName("");
     setEmail("");
@@ -103,22 +147,15 @@ export default function UniversityTeamPage() {
   }
 
   function removeMember(id) {
-    setMembers(
-      members.filter((member) => member.id !== id)
-    );
+    setMembers(members.filter((member) => member.id !== id));
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* HEADER */}
-
       <header className="border-b border-slate-200 bg-white">
-
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-
           <div className="flex items-center gap-4">
-
             <Link
               href="/university/dashboard"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-950"
@@ -127,405 +164,197 @@ export default function UniversityTeamPage() {
             </Link>
 
             <div className="flex items-center gap-3">
-
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
-  <Image
-    src="/logo.png"
-    alt="Samadhan Logo"
-    width={60}
-    height={60}
-    className="h-full w-full object-cover"
-  />
-</div>
-
-              <div>
-                <p className="text-sm font-black">
-                  Samadhan
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  University Portal
-                </p>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#401AD9] font-black text-white shadow-md shadow-[#401AD9]/20">
+                S
               </div>
-
+              <div>
+                <p className="text-sm font-black">Samadhan</p>
+                <p className="text-xs text-slate-400">University Portal</p>
+              </div>
             </div>
-
           </div>
 
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-black text-blue-700">
             UB
           </div>
-
         </div>
-
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
-
+      <main className="mx-auto max-w-7xl px-6 py-10">
         {/* PAGE HEADER */}
-
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-
           <div>
-
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
-              University Workspace
+            <p className="text-xs font-bold uppercase tracking-widest text-[#401AD9]">
+              University Workspace & DB Records
             </p>
-
-            <h1 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">
-              Team Management
+            <h1 className="mt-2 text-3xl font-black tracking-tight md:text-4xl text-slate-900">
+              Registered Teams & Members
             </h1>
-
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-              Manage students and team members participating in
-              Samadhan civic projects.
+              Database record of participating university teams, team leads, student rosters, and uploaded PPT solution documents.
             </p>
-
           </div>
 
           <button
-            onClick={() => setShowModal(true)}
-            className="flex w-fit items-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800"
+            onClick={() => setShowModal(false)}
+            className="flex w-fit items-center gap-2 rounded-2xl bg-[#401AD9] px-5 py-3 text-xs font-bold text-white shadow-md shadow-[#401AD9]/20 transition hover:bg-[#3413B8]"
           >
             <UserPlus className="h-4 w-4" />
-            Add Member
+            Add Individual Member
           </button>
-
         </div>
 
-        {/* STATS */}
+        {/* REGISTERED TEAMS & SOLUTIONS DATABASE SECTION */}
+        {registeredTeams.length > 0 && (
+          <section className="mt-8 space-y-4">
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <Layers className="h-4 w-4 text-[#401AD9]" />
+              Database Registered Teams ({registeredTeams.length})
+            </h2>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-
-          <Stat
-            icon={Users}
-            label="Total Members"
-            value={members.length}
-          />
-
-          <Stat
-            icon={CheckCircle2}
-            label="Active Members"
-            value={
-              members.filter(
-                (member) => member.status === "ACTIVE"
-              ).length
-            }
-          />
-
-          <Stat
-            icon={ShieldCheck}
-            label="Team Leads"
-            value={
-              members.filter(
-                (member) => member.role === "Team Lead"
-              ).length
-            }
-          />
-
-        </div>
-
-        {/* SEARCH */}
-
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-
-          <div className="relative">
-
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search members, roles or projects..."
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
-            />
-
-          </div>
-
-        </section>
-
-        {/* TEAM */}
-
-        <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-100 px-6 py-5">
-
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                <Users className="h-5 w-5 text-blue-600" />
-              </div>
-
-              <div>
-
-                <h2 className="font-black">
-                  University Members
-                </h2>
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Students and coordinators associated with your projects.
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="divide-y divide-slate-100">
-
-            {filteredMembers.map((member) => (
-
-              <div
-                key={member.id}
-                className="flex flex-col gap-4 px-6 py-5 transition hover:bg-slate-50 md:flex-row md:items-center"
-              >
-
-                {/* USER */}
-
-                <div className="flex flex-1 items-center gap-4">
-
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-black text-slate-600">
-                    {member.initials}
-                  </div>
-
-                  <div className="min-w-0">
-
-                    <p className="text-sm font-black">
-                      {member.name}
-                    </p>
-
-                    <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-400">
-
-                      <Mail className="h-3 w-3" />
-
-                      {member.email}
-
+            <div className="grid gap-6 md:grid-cols-2">
+              {registeredTeams.map((team, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-3xl border border-indigo-100 bg-white p-6 shadow-sm transition hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                      <span className="rounded-md bg-indigo-50 px-2.5 py-0.5 text-[10px] font-black text-[#401AD9]">
+                        PROBLEM ID: {team.problemId || "SAM-1042"}
+                      </span>
+                      <h3 className="mt-2 text-xl font-black text-slate-900">
+                        {team.teamName}
+                      </h3>
+                      <p className="text-xs font-medium text-slate-500">
+                        {team.collegeName} ({team.department})
+                      </p>
                     </div>
 
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800">
+                      {team.status || "UNDER_REVIEW"}
+                    </span>
                   </div>
 
+                  {/* Leader details */}
+                  <div className="mt-4 rounded-2xl bg-slate-50 p-4">
+                    <p className="text-[10px] font-black text-slate-400 uppercase">Team Leader</p>
+                    <p className="text-sm font-bold text-slate-900 mt-1">{team.teamLeader?.name}</p>
+                    <p className="text-xs text-slate-500">{team.teamLeader?.email} {team.teamLeader?.phone ? `• ${team.teamLeader.phone}` : ""}</p>
+                  </div>
+
+                  {/* Members */}
+                  {team.teamMembers && team.teamMembers.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-[10px] font-black text-slate-400 uppercase">Team Roster ({team.teamMembers.length})</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {team.teamMembers.map((m, i) => (
+                          <span key={i} className="rounded-xl border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                            {m.name} ({m.role || "Member"})
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Solution PPT Document Link */}
+                  {team.proposedSolution && (
+                    <div className="mt-5 rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4">
+                      <div className="flex items-center gap-2">
+                        <FileCode className="h-4 w-4 text-[#401AD9]" />
+                        <p className="text-xs font-bold text-slate-900 truncate">
+                          {team.proposedSolution.title || "Proposed Innovation Solution"}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-600 line-clamp-2">
+                        {team.proposedSolution.description}
+                      </p>
+                      {team.proposedSolution.pptUrl || team.proposedSolution.docUrl ? (
+                        <a
+                          href={team.proposedSolution.pptUrl || team.proposedSolution.docUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#401AD9] hover:underline"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          View Solution PPT Document ({team.proposedSolution.fileName || "Doc"})
+                        </a>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* INDIVIDUAL MEMBERS ROSTER SECTION */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <Users className="h-4 w-4 text-slate-600" />
+              University Members Roster
+            </h2>
+
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search members..."
+                className="h-9 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-xs outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 divide-y divide-slate-100 rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            {filteredMembers.map((member) => (
+              <div
+                key={member.id}
+                className="flex flex-col gap-4 px-6 py-4 transition hover:bg-slate-50/80 md:flex-row md:items-center"
+              >
+                <div className="flex flex-1 items-center gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 font-black text-[#401AD9] text-xs">
+                    {member.initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-slate-900">{member.name}</p>
+                    <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-400">
+                      <Mail className="h-3 w-3" />
+                      {member.email}
+                    </div>
+                  </div>
                 </div>
 
-                {/* ROLE */}
-
-                <div className="w-44">
-
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Role
-                  </p>
-
-                  <p className="mt-1 text-xs font-bold text-slate-700">
-                    {member.role}
-                  </p>
-
+                <div className="w-40">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Role</p>
+                  <p className="mt-0.5 text-xs font-bold text-slate-700">{member.role}</p>
                 </div>
 
-                {/* PROJECT */}
-
-                <div className="w-52">
-
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Project
-                  </p>
-
-                  <p className="mt-1 truncate text-xs font-bold text-slate-700">
-                    {member.project}
-                  </p>
-
+                <div className="w-48">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Project / Challenge</p>
+                  <p className="mt-0.5 truncate text-xs font-bold text-slate-700">{member.project}</p>
                 </div>
-
-                {/* STATUS */}
 
                 <div>
-
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black text-emerald-700">
-
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-extrabold text-emerald-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-
                     {member.status}
-
                   </span>
-
                 </div>
-
-                {/* ACTION */}
 
                 <button
                   onClick={() => removeMember(member.id)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition hover:bg-red-50 hover:text-red-600"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition hover:bg-red-50 hover:text-red-600"
                   title="Remove member"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-
               </div>
-
             ))}
-
           </div>
-
-          {filteredMembers.length === 0 && (
-
-            <div className="px-6 py-14 text-center">
-
-              <Users className="mx-auto h-8 w-8 text-slate-300" />
-
-              <p className="mt-3 text-sm font-bold text-slate-500">
-                No members found.
-              </p>
-
-            </div>
-
-          )}
-
         </section>
-
-      </div>
-
-      {/* ADD MEMBER MODAL */}
-
-      {showModal && (
-
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-5 backdrop-blur-sm">
-
-          <div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl">
-
-            <div className="flex items-start justify-between">
-
-              <div>
-
-                <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                  Team
-                </p>
-
-                <h2 className="mt-2 text-2xl font-black">
-                  Add Member
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  Add a student or coordinator to your university.
-                </p>
-
-              </div>
-
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-2xl text-slate-300 hover:text-slate-700"
-              >
-                ×
-              </button>
-
-            </div>
-
-            <form
-              onSubmit={addMember}
-              className="mt-7 space-y-5"
-            >
-
-              <div>
-
-                <label className="text-xs font-bold text-slate-700">
-                  Full name
-                </label>
-
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Student name"
-                  className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
-                />
-
-              </div>
-
-              <div>
-
-                <label className="text-xs font-bold text-slate-700">
-                  University email
-                </label>
-
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@university.edu"
-                  className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
-                />
-
-              </div>
-
-              <div>
-
-                <label className="text-xs font-bold text-slate-700">
-                  Role
-                </label>
-
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
-                >
-                  <option>Team Member</option>
-                  <option>Team Lead</option>
-                  <option>Frontend Developer</option>
-                  <option>Backend Developer</option>
-                  <option>Data Analyst</option>
-                  <option>Designer</option>
-                </select>
-
-              </div>
-
-              <div className="flex gap-3 pt-2">
-
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-slate-950 py-3 text-sm font-black text-white hover:bg-slate-800"
-                >
-                  Add Member
-                </button>
-
-              </div>
-
-            </form>
-
-          </div>
-
-        </div>
-
-      )}
-
-    </main>
-  );
-}
-
-function Stat({
-  icon: Icon,
-  label,
-  value,
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
-        <Icon className="h-5 w-5 text-slate-600" />
-      </div>
-
-      <p className="mt-4 text-xs font-semibold text-slate-400">
-        {label}
-      </p>
-
-      <p className="mt-1 text-2xl font-black">
-        {value}
-      </p>
-
+      </main>
     </div>
   );
 }

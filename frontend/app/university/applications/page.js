@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useAuth } from "@clerk/nextjs";
+import { getUniversityProposals } from "@/services/university.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,8 +20,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-// demo data for applications
-const applications = [
+const demoApplications = [
   {
     id: "APP-2081",
     challengeId: "SAM-1042",
@@ -75,8 +76,34 @@ const statuses = [
 ];
 
 export default function UniversityApplicationsPage() {
+  const { getToken } = useAuth();
+  const [applications, setApplications] = useState(demoApplications);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("ALL");
+
+  useEffect(() => {
+    getToken()
+      .then((token) => getUniversityProposals(token || undefined))
+      .then((res) => {
+        const list = res?.data || [];
+        if (list.length > 0) {
+          setApplications(
+            list.map((item, idx) => ({
+              id: `APP-${2080 - idx}`,
+              challengeId: item.challengeId || "SAM-1042",
+              title: item.projectTitle || "Civic AI Solution",
+              department: "Municipal Services",
+              team: item.teamLead || "Student Lead",
+              submitted: item.submittedAt ? new Date(item.submittedAt).toLocaleDateString("en-IN") : "Recently",
+              status: item.status || "UNDER REVIEW",
+              category: "Technology",
+              members: 4,
+            }))
+          );
+        }
+      })
+      .catch((err) => console.warn("Could not load proposals from backend:", err.message));
+  }, [getToken]);
 
   const filteredApplications = useMemo(() => {
     return applications.filter((application) => {

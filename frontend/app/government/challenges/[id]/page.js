@@ -87,9 +87,24 @@ export default function GovernmentChallengeDetails() {
   useEffect(() => {
     getToken().then((token) => getGovernmentChallenges(token || undefined)).then((res) => {
       const item = (res?.data || []).find((value) => String(value._id || value.id) === String(id));
-      if (item) setChallenge({ ...defaultChallenge, ...item, id: item._id || item.id, department: item.targetDepartment || "Unassigned", status: item.status === "OPEN" ? "SUBMITTED" : item.status, submittedDate: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : defaultChallenge.submittedDate, decisionReason: item.decisionReason || "" });
+      const localSavedDept = typeof window !== "undefined" ? localStorage.getItem(`assigned_dept_${id}`) : null;
+      
+      if (item) {
+        const fetchedDepartment = localSavedDept || item.targetDepartment || item.assignedDepartmentId || item.department || "Unassigned";
+        const fetchedStatus = (item.status === "OPEN" ? "SUBMITTED" : item.status) || (fetchedDepartment !== "Unassigned" ? "ASSIGNED" : "SUBMITTED");
+        setChallenge((prev) => ({ ...prev, ...item, id: item._id || item.id, department: fetchedDepartment, targetDepartment: fetchedDepartment, status: fetchedStatus, submittedDate: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : prev.submittedDate, decisionReason: item.decisionReason || "" }));
+        setCurrentStatus(fetchedStatus);
+        if (fetchedDepartment && fetchedDepartment !== "Unassigned") {
+          setSelectedDepartment(fetchedDepartment);
+        }
+      } else if (localSavedDept) {
+        setSelectedDepartment(localSavedDept);
+        setChallenge((prev) => ({ ...prev, department: localSavedDept, targetDepartment: localSavedDept, status: "ASSIGNED" }));
+        setCurrentStatus("ASSIGNED");
+      }
     }).catch((error) => setMessage(error.message)).finally(() => setLoading(false));
   }, [id, getToken]);
+
   const [currentStatus, setCurrentStatus] = useState(
     challenge.status
   );
@@ -152,7 +167,19 @@ export default function GovernmentChallengeDetails() {
     } catch (error) { setMessage(error.message || "Could not assign department."); return; }
     setShowAssignModal(false);
 
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`assigned_dept_${id || challenge.id}`, selectedDepartment);
+    }
+
     setCurrentStatus("ASSIGNED");
+    setChallenge((prev) => ({
+      ...prev,
+      department: selectedDepartment,
+      targetDepartment: selectedDepartment,
+      status: "ASSIGNED",
+    }));
+    setSelectedDepartment(selectedDepartment);
+    setChallenge((prev) => ({ ...prev, department: selectedDepartment, targetDepartment: selectedDepartment }));
 
     setMessage(
       `Challenge assigned to ${selectedDepartment}.`
@@ -160,6 +187,48 @@ export default function GovernmentChallengeDetails() {
 
     setTimeout(() => setMessage(""), 3000);
   }
+
+  // Dynamic timeline progression calculation based on strict sequential lifecycle
+  const normalizedStatus = String(currentStatus || challenge.status || "").trim().toUpperCase();
+  const assignedDept = challenge.department || challenge.targetDepartment || selectedDepartment;
+  const hasDepartment = assignedDept && assignedDept !== "Unassigned" && assignedDept !== "Unassigned.";
+
+  const isAssigned = hasDepartment && (normalizedStatus === "ASSIGNED" || normalizedStatus === "IN_PROGRESS" || normalizedStatus === "IN PROGRESS" || normalizedStatus === "IN PROGRESS" || normalizedStatus === "RESOLVED");
+  const isExecuting = isAssigned && (normalizedStatus === "IN_PROGRESS" || normalizedStatus === "IN PROGRESS" || normalizedStatus === "RESOLVED");
+  const isResolved = normalizedStatus === "RESOLVED";
+
+  const dynamicTimeline = [
+    {
+      title: "Challenge submitted",
+      description: "Citizen submitted the civic issue.",
+      date: challenge.submittedDate || "28 Aug 2026",
+      completed: true,
+    },
+    {
+      title: "Under government review",
+      description: "The challenge is currently being evaluated.",
+      date: challenge.submittedDate || "28 Aug 2026",
+      completed: true,
+    },
+    {
+      title: "Department assignment",
+      description: isAssigned ? `Assigned to ${assignedDept}.` : "Assign the challenge to the responsible department.",
+      date: isAssigned ? (challenge.submittedDate || new Date().toLocaleDateString("en-IN")) : "Pending",
+      completed: isAssigned,
+    },
+    {
+      title: "Project execution",
+      description: isExecuting ? "Department works on the approved civic project." : "Ground project execution pending.",
+      date: isExecuting ? new Date().toLocaleDateString("en-IN") : "Pending",
+      completed: isExecuting,
+    },
+    {
+      title: "Resolution",
+      description: isResolved ? "Issue is resolved and verified." : "Awaiting final resolution.",
+      date: isResolved ? new Date().toLocaleDateString("en-IN") : "Pending",
+      completed: isResolved,
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -241,25 +310,27 @@ export default function GovernmentChallengeDetails() {
 
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          {currentStatus !== "ACCEPTED" && currentStatus !== "In Progress" && currentStatus !== "REJECTED" && currentStatus !== "Rejected" && (
+            <div className="flex flex-wrap gap-2">
 
-            <button
-              onClick={() => handleStatusChange("ACCEPTED")}
-              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Accept
-            </button>
+              <button
+                onClick={() => handleStatusChange("ACCEPTED")}
+                className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 shadow-md"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Accept
+              </button>
 
-            <button
-              onClick={() => setShowRejectModal(true)}
-              className="flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
-            >
-              <XCircle className="h-4 w-4" />
-              Reject
-            </button>
+              <button
+                onClick={() => setShowRejectModal(true)}
+                className="flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 shadow-sm"
+              >
+                <XCircle className="h-4 w-4" />
+                Reject
+              </button>
 
-          </div>
+            </div>
+          )}
 
         </div>
 
@@ -367,14 +438,14 @@ export default function GovernmentChallengeDetails() {
 
               <div className="mt-7">
 
-                {timeline.map((item, index) => (
+                {dynamicTimeline.map((item, index) => (
 
                   <div
                     key={item.title}
                     className="relative flex gap-4 pb-8 last:pb-0"
                   >
 
-                    {index !== timeline.length - 1 && (
+                    {index !== dynamicTimeline.length - 1 && (
                       <div
                         className={`absolute left-4 top-9 h-full w-px ${
                           item.completed

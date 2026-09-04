@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   Upload,
@@ -15,6 +15,8 @@ import {
   CalendarDays,
   Building2,
 } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
+import { getUniversityProposals, submitUniversityProposal } from "@/services/university.service";
 
 const initialSubmissions = [
   {
@@ -40,12 +42,35 @@ const initialSubmissions = [
 ];
 
 export default function UniversitySubmissionsPage() {
-  const [submissions, setSubmissions] =
-    useState(initialSubmissions);
+  const { getToken } = useAuth();
+  const [submissions, setSubmissions] = useState(initialSubmissions);
 
   const [showModal, setShowModal] = useState(false);
   const [project, setProject] = useState("Road Safety Analytics");
   const [fileName, setFileName] = useState("");
+
+  useEffect(() => {
+    getToken()
+      .then((token) => getUniversityProposals(token || undefined))
+      .then((res) => {
+        const list = res?.data || [];
+        if (list.length > 0) {
+          setSubmissions(
+            list.map((item, idx) => ({
+              id: `SUB-${String(idx + 22).padStart(3, "0")}`,
+              project: item.projectTitle || "Civic Research Proposal",
+              projectId: item.challengeId || `PRJ-0${idx + 15}`,
+              department: "Municipal Operations",
+              file: `${(item.projectTitle || "Solution").replace(/\s+/g, "_")}_Proposal.pdf`,
+              size: "3.4 MB",
+              submitted: item.submittedAt ? new Date(item.submittedAt).toLocaleDateString("en-IN") : "Recently",
+              status: item.status || "UNDER REVIEW",
+            }))
+          );
+        }
+      })
+      .catch((err) => console.warn("Could not load submissions from backend:", err.message));
+  }, [getToken]);
 
   function handleFile(e) {
     const file = e.target.files?.[0];
@@ -55,7 +80,7 @@ export default function UniversitySubmissionsPage() {
     }
   }
 
-  function submitProject(e) {
+  async function submitProject(e) {
     e.preventDefault();
 
     if (!fileName) return;
@@ -73,14 +98,27 @@ export default function UniversitySubmissionsPage() {
           : "Water Department",
       file: fileName,
       size: "Pending",
-      submitted: "31 Aug 2026",
+      submitted: new Date().toLocaleDateString("en-IN"),
       status: "UNDER REVIEW",
     };
 
-    setSubmissions([
-      newSubmission,
-      ...submissions,
-    ]);
+    try {
+      const token = await getToken();
+      await submitUniversityProposal(
+        {
+          universityName: "BIT Mesra (Birla Institute of Technology)",
+          challengeId: newSubmission.projectId,
+          projectTitle: project,
+          proposalText: `Uploaded proposal document: ${fileName}`,
+          teamLead: "BIT Mesra Research Team",
+        },
+        token || undefined
+      );
+      setSubmissions([newSubmission, ...submissions]);
+    } catch (err) {
+      console.warn("Submission stored locally:", err.message);
+      setSubmissions([newSubmission, ...submissions]);
+    }
 
     setFileName("");
     setShowModal(false);

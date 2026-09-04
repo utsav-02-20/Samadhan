@@ -82,12 +82,13 @@ export default function ReportDetails({ params }) {
   }, [id, user, getToken]);
 
   // Dynamic DB status calculation for resolution timeline
-  const dbStatus = report.status || "Pending";
+  const dbStatus = String(report.status || "Pending").toUpperCase();
   const dateStr = report.reportedOn || (report.createdAt ? new Date(report.createdAt).toLocaleDateString("en-IN") : "Recently");
 
-  const isPending = dbStatus === "Pending" || dbStatus === "SUBMITTED";
-  const isInProgress = dbStatus === "In Progress" || dbStatus === "UNDER_REVIEW" || dbStatus === "ACCEPTED";
-  const isResolved = dbStatus === "Resolved" || dbStatus === "RESOLVED";
+  const isVerified = dbStatus !== "PENDING" && dbStatus !== "SUBMITTED" && dbStatus !== "OPEN";
+  const isAssigned = isVerified && (dbStatus === "ASSIGNED" || dbStatus === "IN_PROGRESS" || dbStatus === "IN PROGRESS" || dbStatus === "ACCEPTED" || dbStatus === "RESOLVED");
+  const isInProgress = isVerified && (dbStatus === "IN_PROGRESS" || dbStatus === "IN PROGRESS" || dbStatus === "RESOLVED");
+  const isResolved = dbStatus === "RESOLVED" || dbStatus === "RESOLVED";
 
   const dynamicUpdates = [
     {
@@ -98,21 +99,21 @@ export default function ReportDetails({ params }) {
     },
     {
       title: "Issue verified",
-      description: "The complaint was reviewed and verified by district administration.",
-      date: isInProgress || isResolved ? dateStr : "Pending",
-      completed: isInProgress || isResolved,
+      description: isVerified ? "The complaint was reviewed and verified by district administration." : "Awaiting verification by district administration.",
+      date: isVerified ? dateStr : "Pending",
+      completed: isVerified,
     },
     {
       title: "Assigned to department",
-      description: `The issue was assigned to ${report.department || "Municipal Operations"}.`,
-      date: isInProgress || isResolved ? dateStr : "Pending",
-      completed: isInProgress || isResolved,
+      description: isAssigned ? `The issue was assigned to ${report.department || "Municipal Operations"}.` : "Pending department allocation.",
+      date: isAssigned ? dateStr : "Pending",
+      completed: isAssigned,
     },
     {
       title: "Work in progress",
-      description: "The assigned department is currently executing ground resolution.",
-      date: isInProgress || isResolved ? dateStr : "Pending",
-      completed: isInProgress || isResolved,
+      description: isInProgress ? "The assigned department is currently executing ground resolution." : "Ground execution pending.",
+      date: isInProgress ? dateStr : "Pending",
+      completed: isInProgress,
     },
     {
       title: "Resolved",

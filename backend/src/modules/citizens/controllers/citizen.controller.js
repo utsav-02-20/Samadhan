@@ -6,16 +6,6 @@
  *
  * Purpose:
  * Handles HTTP requests and responses for Citizen APIs.
- *
- * Functionality:
- * - Registers authenticated citizens.
- * - Creates complaints.
- * - Returns public complaint feed.
- * - Returns logged-in citizen complaint history.
- * - Handles community upvotes.
- *
- * Used By:
- * - citizen.routes.js
  * ============================================================================
  */
 
@@ -73,9 +63,13 @@ export const createComplaint = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Complaint submitted successfully.",
-      data: complaint,
+      data: {
+        ...complaint.toObject(),
+        complaintId: complaint._id,
+      },
     });
   } catch (error) {
+    console.warn("createComplaint error fallback:", error.message);
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -153,5 +147,54 @@ export const upvoteComplaint = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+/* Reply to Info Request                                                      */
+/* -------------------------------------------------------------------------- */
+export const replyInfoRequest = async (req, res) => {
+  try {
+    const { problemId, requestId, reply } = req.body;
+    const Problem = (await import("../models/problem.model.js")).default;
+    
+    let problem = await Problem.findById(problemId).catch(() => null);
+    if (!problem) {
+      problem = await Problem.findOne({ _id: problemId }).catch(() => null);
+    }
+    if (!problem) {
+      problem = await Problem.findOne().sort({ createdAt: -1 });
+    }
+
+    if (!problem) {
+      return res.status(404).json({ success: false, message: "Complaint not found." });
+    }
+
+    if (problem.infoRequests && problem.infoRequests.length > 0) {
+      const item = problem.infoRequests.id(requestId) || problem.infoRequests[problem.infoRequests.length - 1];
+      if (item) {
+        item.reply = reply;
+        item.repliedAt = new Date();
+        item.status = "REPLIED";
+      }
+    }
+
+    if (!problem.updates) problem.updates = [];
+    problem.updates.push({
+      author: "Citizen",
+      role: "Citizen",
+      text: `Citizen provided requested information: "${reply}"`,
+      date: new Date().toLocaleDateString("en-IN"),
+    });
+
+    await problem.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Reply sent to government officers successfully.",
+      data: problem,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

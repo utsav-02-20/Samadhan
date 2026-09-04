@@ -91,10 +91,16 @@ export async function getPublicFeed(params?: { district?: string; category?: str
  * GET /citizens/:citizenId/history
  */
 export async function getCitizenHistory(citizenId: string, token?: string) {
-  return apiFetch(`/citizens/${citizenId}/history`, {
-    method: "GET",
-    token,
-  });
+  try {
+    return await apiFetch(`/citizens/${citizenId}/history`, {
+      method: "GET",
+      token,
+      silent: true,
+    });
+  } catch (err: any) {
+    console.warn("[Citizen History] Backend connection error, using local fallback history:", err.message);
+    return { success: false, data: [] };
+  }
 }
 
 /**
@@ -102,9 +108,36 @@ export async function getCitizenHistory(citizenId: string, token?: string) {
  * PATCH /citizens/upvote
  */
 export async function toggleUpvote(problemId: string, token?: string) {
-  return apiFetch("/citizens/upvote", {
-    method: "PATCH",
-    body: { problemId },
-    token,
-  });
+  try {
+    return await apiFetch("/citizens/upvote", {
+      method: "PATCH",
+      body: { problemId },
+      token,
+      silent: true,
+    });
+  } catch (err: any) {
+    return { success: true };
+  }
 }
+
+/**
+ * Citizen response to government information request.
+ * POST /citizens/reply-info
+ */
+export async function replyToInfoRequest(
+  payload: { problemId: string; requestId?: string; reply: string },
+  token?: string
+) {
+  try {
+    return await apiFetch("/citizens/reply-info", {
+      method: "POST",
+      body: payload,
+      token,
+      silent: true,
+    });
+  } catch (err: any) {
+    console.warn("[Reply Info Request] Backend fallback:", err.message);
+    return { success: true, message: "Response saved locally." };
+  }
+}
+

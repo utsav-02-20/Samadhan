@@ -23,7 +23,7 @@ export default function UniversityLogin() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    window.location.href = "/university/auth/sign-in";
+    window.location.href = "/university/dashboard";
   }
 
   return (
@@ -229,12 +229,19 @@ export default function UniversityLogin() {
 
             </div>
 
-            {/* Other portals */}
-            <div className="mt-8 text-center">
+            {/* Other portals & Sign Up */}
+            <div className="mt-8 flex flex-col items-center gap-3 text-center">
+
+              <Link
+                href="/university/register"
+                className="text-sm font-bold text-blue-600 hover:text-blue-700"
+              >
+                Don't have an account? Register your University / College →
+              </Link>
 
               <Link
                 href="/login"
-                className="text-sm font-semibold text-slate-500 hover:text-slate-950"
+                className="text-xs font-semibold text-slate-500 hover:text-slate-950"
               >
                 Sign in using another portal
               </Link>

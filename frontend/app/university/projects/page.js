@@ -14,7 +14,11 @@ import {
   Users,
 } from "lucide-react";
 
-const projects = [
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { getUniversityProjects, getUniversityChallenges } from "@/services/university.service";
+
+const demoProjects = [
   {
     id: "PRJ-021",
     challengeId: "SAM-1021",
@@ -60,11 +64,57 @@ const projects = [
 ];
 
 export default function UniversityProjectsPage() {
-  const activeProjects = projects.filter(
+  const { getToken } = useAuth();
+  const [projectsList, setProjectsList] = useState(demoProjects);
+
+  useEffect(() => {
+    Promise.all([getUniversityProjects(), getUniversityChallenges()])
+      .then(([projRes, chalRes]) => {
+        const liveProjects = projRes?.data || [];
+        const liveChallenges = chalRes?.data || [];
+
+        if (liveProjects.length > 0) {
+          setProjectsList(
+            liveProjects.map((p, idx) => ({
+              id: p.id || `PRJ-0${idx + 20}`,
+              challengeId: `SAM-${1020 + idx}`,
+              title: p.title || "Civic AI Project",
+              department: p.category || "Research Department",
+              team: p.leadResearcher || "University R&D",
+              status: p.status === "COMPLETED" ? "COMPLETED" : (p.progressPercentage > 80 ? "NEAR COMPLETION" : "IN PROGRESS"),
+              progress: p.progressPercentage || 65,
+              members: 4,
+              started: "15 Aug 2026",
+              deadline: "30 Oct 2026",
+              description: p.description || "Research project developed under Samadhan HEI Innovation Network.",
+            }))
+          );
+        } else if (liveChallenges.length > 0) {
+          setProjectsList(
+            liveChallenges.map((c, idx) => ({
+              id: `PRJ-0${idx + 15}`,
+              challengeId: c._id ? String(c._id).slice(-8) : `SAM-${1000 + idx}`,
+              title: c.title,
+              department: c.category || c.district || "Municipal Services",
+              team: "University Research Team",
+              status: c.status === "Resolved" ? "COMPLETED" : (c.status === "In Progress" ? "IN PROGRESS" : "IN PROGRESS"),
+              progress: c.status === "Resolved" ? 100 : (c.status === "In Progress" ? 55 : 30),
+              members: 5,
+              started: c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-IN") : "20 Aug 2026",
+              deadline: "30 Oct 2026",
+              description: c.description || "Societal challenge under active multidisciplinary research.",
+            }))
+          );
+        }
+      })
+      .catch((err) => console.warn("Could not load projects from backend:", err.message));
+  }, [getToken]);
+
+  const activeProjects = projectsList.filter(
     (project) => project.status !== "COMPLETED"
   );
 
-  const completedProjects = projects.filter(
+  const completedProjects = projectsList.filter(
     (project) => project.status === "COMPLETED"
   );
 
@@ -188,7 +238,7 @@ export default function UniversityProjectsPage() {
           <SummaryCard
             icon={BookOpen}
             label="Total Projects"
-            value={projects.length}
+            value={projectsList.length}
           />
 
           <SummaryCard

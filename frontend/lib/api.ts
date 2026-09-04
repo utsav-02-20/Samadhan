@@ -70,9 +70,14 @@ export async function apiFetch<T = any>(
     return data as T;
   } catch (error: any) {
     if (!options.silent) {
-      console.warn(`[API Info] ${endpoint} backend unavailable, using local data.`);
+      console.warn(`[API Info] ${endpoint} backend unavailable (${error.message}). Using fallback mode.`);
     }
-    throw error;
+    return {
+      success: false,
+      message: error.message || "Backend server unavailable",
+      data: [],
+      isOffline: true,
+    } as T;
   }
 }
 

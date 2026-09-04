@@ -74,7 +74,28 @@ export const createComplaint = async (
   files = []
 ) => {
   const images = await uploadImages(files);
-  return Problem.create({ citizenId, ...complaintData, images });
+
+  let realCitizenId = citizenId;
+  if (!mongoose.Types.ObjectId.isValid(citizenId)) {
+    let citizenDoc = await Citizen.findOne({ clerkId: citizenId });
+    if (!citizenDoc) {
+      citizenDoc = await Citizen.create({
+        clerkId: citizenId || `anon_${Date.now()}`,
+        fullName: complaintData.submittedBy || "Citizen",
+        email: `${citizenId || Date.now()}@samadhan.org`,
+        district: complaintData.district || "General",
+      });
+    }
+    realCitizenId = citizenDoc._id;
+  }
+
+  const problem = await Problem.create({
+    citizenId: realCitizenId,
+    ...complaintData,
+    images: images.length > 0 ? images : complaintData.images || [],
+  });
+
+  return problem;
 };
 
 /* -------------------------------------------------------------------------- */
