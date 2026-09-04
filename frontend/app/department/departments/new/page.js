@@ -14,12 +14,13 @@ export default function NewDepartmentPage() {
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    // TODO: POST /api/departments
     setSubmitted(true);
   }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
-      {/* Header */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Logo href="/department/dashboard" subtitle="Department Portal" size="sm" />
@@ -41,16 +42,24 @@ export default function NewDepartmentPage() {
               <Building2 className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900">Register Department Unit</h1>
-              <p className="text-xs text-slate-500">Configure new department node for routed grievance tracking</p>
+              <h1 className="text-2xl font-black text-slate-900">
+                Register Department Unit
+              </h1>
+              <p className="text-xs text-slate-500">
+                Configure new department node for routed grievance tracking.
+              </p>
             </div>
           </div>
 
           {submitted ? (
             <div className="mt-8 rounded-2xl bg-emerald-50 p-6 text-center">
               <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
-              <h2 className="mt-3 font-bold text-slate-900">Department Registered</h2>
-              <p className="mt-1 text-xs text-slate-500">The department node has been successfully provisioned.</p>
+              <h2 className="mt-3 font-bold text-slate-900">
+                Department Registered
+              </h2>
+              <p className="mt-1 text-xs text-slate-500">
+                The department node has been successfully provisioned.
+              </p>
 
               <Link
                 href="/department/dashboard"
@@ -62,7 +71,9 @@ export default function NewDepartmentPage() {
           ) : (
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-700">Department Full Name</label>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700">
+                  Department Full Name
+                </label>
                 <input
                   type="text"
                   required
@@ -74,7 +85,9 @@ export default function NewDepartmentPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-700">Short Code</label>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700">
+                  Short Code
+                </label>
                 <input
                   type="text"
                   required
@@ -86,7 +99,9 @@ export default function NewDepartmentPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-700">Department Head Name</label>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700">
+                  Department Head Name
+                </label>
                 <input
                   type="text"
                   required
@@ -98,7 +113,9 @@ export default function NewDepartmentPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-700">Official Contact Email</label>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700">
+                  Official Contact Email
+                </label>
                 <input
                   type="email"
                   required
