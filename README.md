@@ -11,6 +11,7 @@
 | Member | Role |
 |--------|------|
 | **[Utsav Kumar](https://github.com/utsav-02-20)** |
+| **[Prince Verma](https://github.com/princeVerma73)** |
 
 
 ---
