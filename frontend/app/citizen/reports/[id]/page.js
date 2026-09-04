@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import {
   ArrowLeft,
   MapPin,
@@ -14,12 +14,72 @@ import {
 } from "lucide-react";
 
 import Logo from "@/components/ui/Logo";
-import { UserButton } from "@clerk/nextjs";
+import { useUser, useAuth, UserButton } from "@clerk/nextjs";
+import { getCitizenHistory, getPublicFeed, toReportView } from "@/services/citizen.service";
 import { REPORT_DETAILS_MOCK as reports } from "@/data/demoData";
 
 export default function ReportDetails({ params }) {
   const { id } = use(params);
-  const report = reports[id] || reports["SAM-1024"];
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  
+  const initialFallback = reports[id] || reports["SAM-1024"] || {
+    id: id || "SAM-1024",
+    title: "Civic Issue Report",
+    category: "Infrastructure",
+    status: "Pending",
+    reportedOn: "Recently",
+    location: "Sector 4, Main Market",
+    department: "Municipal Operations",
+    description: "Civic issue submitted via Samadhan Portal.",
+  };
+
+  const [report, setReport] = useState(initialFallback);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const token = await getToken();
+        let foundItem = null;
+
+        if (user) {
+          const userHistoryRes = await getCitizenHistory(user.id, token || undefined).catch(() => null);
+          const historyList = userHistoryRes?.data || [];
+          foundItem = historyList.find(
+            (item) => String(item._id || item.id) === String(id) || String(item._id).slice(-8) === String(id)
+          );
+        }
+
+        if (!foundItem) {
+          const publicFeedRes = await getPublicFeed().catch(() => null);
+          const publicList = publicFeedRes?.data || [];
+          foundItem = publicList.find(
+            (item) => String(item._id || item.id) === String(id) || String(item._id).slice(-8) === String(id)
+          );
+        }
+
+        if (foundItem) {
+          const formatted = toReportView(foundItem);
+          setReport({
+            ...initialFallback,
+            ...formatted,
+            title: foundItem.title || initialFallback.title,
+            category: foundItem.category || initialFallback.category,
+            description: foundItem.description || initialFallback.description,
+            location: typeof foundItem.location === "object" ? (foundItem.locality || foundItem.district || "General Locality") : (foundItem.location || initialFallback.location),
+            department: foundItem.assignedDepartmentId || foundItem.targetDepartment || foundItem.department || initialFallback.department,
+            images: foundItem.images && foundItem.images.length > 0 ? foundItem.images : initialFallback.images,
+          });
+        }
+      } catch (err) {
+        console.error("Could not load report details from database:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [id, user, getToken]);
 
   // Dynamic DB status calculation for resolution timeline
   const dbStatus = report.status || "Pending";
@@ -314,23 +374,32 @@ export default function ReportDetails({ params }) {
 
           </div>
 
-          <div className="mt-5 flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50">
-
-            <div className="text-center">
-
-              <Camera className="mx-auto h-7 w-7 text-slate-300" />
-
-              <p className="mt-2 text-xs font-bold text-slate-400">
-                Evidence photo
-              </p>
-
-              <p className="mt-1 text-[10px] text-slate-300">
-                Will be loaded from backend
-              </p>
-
+          {report.images && report.images.length > 0 ? (
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {report.images.map((imgUrl, idx) => (
+                <div key={idx} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imgUrl}
+                    alt={`Evidence ${idx + 1}`}
+                    className="h-48 w-full object-cover"
+                  />
+                </div>
+              ))}
             </div>
-
-          </div>
+          ) : (
+            <div className="mt-5 flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50">
+              <div className="text-center">
+                <Camera className="mx-auto h-7 w-7 text-slate-300" />
+                <p className="mt-2 text-xs font-bold text-slate-400">
+                  No image attached
+                </p>
+                <p className="mt-1 text-[10px] text-slate-300">
+                  Citizen submitted report without photo attachment
+                </p>
+              </div>
+            </div>
+          )}
 
         </section>
 
