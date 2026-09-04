@@ -29,7 +29,7 @@ const problemSchema = new mongoose.Schema(
   {
     // Citizen who submitted the complaint
     citizenId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.Mixed,
       ref: "Citizen",
       required: true,
     },
@@ -112,6 +112,24 @@ const problemSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    assignedDepartmentId: { type: String, default: "" },
+    decisionReason: { type: String, default: "" },
+    milestones: [
+      {
+        title: { type: String, required: true },
+        description: { type: String, default: "" },
+        status: { type: String, enum: ["PENDING", "IN_PROGRESS", "COMPLETED"], default: "PENDING" },
+        date: { type: String, default: "" },
+      },
+    ],
+    updates: [
+      {
+        author: { type: String, default: "Government Officer" },
+        role: { type: String, default: "Government" },
+        text: { type: String, required: true },
+        date: { type: String, default: "" },
+      },
+    ],
   },
   {
     timestamps: true,

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import { getGovernmentChallenges } from "@/services/government.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,7 +20,7 @@ const challenges = [
     id: "SAM-1024",
     title: "Broken street lights in residential area",
     category: "Infrastructure",
-    submittedBy: "Rahul Sharma",
+    submittedBy: "Anonymous Citizen",
     department: "Public Works",
     status: "UNDER_REVIEW",
     date: "28 Aug 2026",
@@ -28,7 +30,7 @@ const challenges = [
     id: "SAM-1021",
     title: "Garbage accumulation near community park",
     category: "Sanitation",
-    submittedBy: "Priya Mehta",
+    submittedBy: "Anonymous Citizen",
     department: "Sanitation",
     status: "SUBMITTED",
     date: "27 Aug 2026",
@@ -38,7 +40,7 @@ const challenges = [
     id: "SAM-1017",
     title: "Water supply disruption in Sector 4",
     category: "Water Supply",
-    submittedBy: "Amit Kumar",
+    submittedBy: "Anonymous Citizen",
     department: "Water Department",
     status: "ACCEPTED",
     date: "26 Aug 2026",
@@ -48,7 +50,7 @@ const challenges = [
     id: "SAM-1011",
     title: "Damaged road near university",
     category: "Roads",
-    submittedBy: "Neha Singh",
+    submittedBy: "Anonymous Citizen",
     department: "Public Works",
     status: "ASSIGNED",
     date: "25 Aug 2026",
@@ -58,7 +60,7 @@ const challenges = [
     id: "SAM-1008",
     title: "Open drainage near residential block",
     category: "Drainage",
-    submittedBy: "Arjun Verma",
+    submittedBy: "Anonymous Citizen",
     department: "Municipal Services",
     status: "UNDER_REVIEW",
     date: "24 Aug 2026",
@@ -68,7 +70,7 @@ const challenges = [
     id: "SAM-1002",
     title: "Traffic signal malfunction",
     category: "Traffic",
-    submittedBy: "Karan Patel",
+    submittedBy: "Anonymous Citizen",
     department: "Traffic Department",
     status: "SUBMITTED",
     date: "22 Aug 2026",
@@ -78,7 +80,7 @@ const challenges = [
     id: "SAM-0996",
     title: "Public park maintenance issue",
     category: "Public Spaces",
-    submittedBy: "Sneha Jain",
+    submittedBy: "Anonymous Citizen",
     department: "Municipal Services",
     status: "ACCEPTED",
     date: "20 Aug 2026",
@@ -116,12 +118,25 @@ const priorityConfig = {
 };
 
 export default function GovernmentChallengesPage() {
+  const [liveChallenges, setLiveChallenges] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("ALL");
+  useEffect(() => {
+    getGovernmentChallenges()
+      .then((res) => setLiveChallenges((res?.data || []).map((item) => ({
+        ...item,
+        id: item.id || item._id,
+        department: item.targetDepartment || "Unassigned",
+        date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "",
+        status: item.status === "Pending" ? "SUBMITTED" : item.status === "In Progress" ? "ASSIGNED" : item.status,
+      }))))
+      .catch((err) => { setLoadError(err.message || "Could not load challenges"); console.error(err); });
+  }, []);
   const [priority, setPriority] = useState("ALL");
 
   const filteredChallenges = useMemo(() => {
-    return challenges.filter((challenge) => {
+    return liveChallenges.filter((challenge) => {
       const searchableText = [
         challenge.id,
         challenge.title,
@@ -189,9 +204,14 @@ export default function GovernmentChallengesPage() {
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 

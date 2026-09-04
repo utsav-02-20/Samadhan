@@ -1,11 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f8fb;
+  --background: #f8fafc;
   --foreground: #0f172a;
   --muted: #64748b;
   --border: #e2e8f0;
-  --primary: #172554;
+  --primary: #401ad9;
+  --primary-gradient: linear-gradient(135deg, #401ad9 0%, #5b34f4 100%);
+  --accent-surface: #eef2ff;
+}
+
+@theme {
+  --color-royal-indigo: #401ad9;
+  --color-royal-indigo-light: #5b34f4;
+  --color-accent-surface: #eef2ff;
 }
 
 * {
@@ -31,6 +39,23 @@ body {
     sans-serif;
 }
 
+/* Custom Royal Indigo Utility Classes */
+.bg-royal-gradient {
+  background: linear-gradient(135deg, #401ad9 0%, #5b34f4 100%);
+}
+
+.text-royal-indigo {
+  color: #401ad9;
+}
+
+.bg-royal-indigo {
+  background-color: #401ad9;
+}
+
+.border-royal-indigo {
+  border-color: #401ad9;
+}
+
 button,
 input,
 textarea,
@@ -48,6 +73,6 @@ a {
 }
 
 ::selection {
-  background: #c7d2fe;
-  color: #172554;
+  background: #e0e7ff;
+  color: #401ad9;
 }

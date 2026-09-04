@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Building2,
@@ -10,6 +11,8 @@ import {
   Sparkles,
   ChevronLeft,
 } from "lucide-react";
+
+import Logo from "@/components/ui/Logo";
 
 const roles = [
   {
@@ -26,17 +29,17 @@ const roles = [
     title: "Government",
     description:
       "Register a government account to oversee districts, approve projects and monitor public services.",
-    href: "/signup/government",
+    href: "/government/auth/sign-up",
     icon: Landmark,
-    accent: "bg-indigo-50 text-indigo-600",
-    hover: "group-hover:bg-indigo-600",
+    accent: "bg-indigo-50 text-[#401AD9]",
+    hover: "group-hover:bg-[#401AD9]",
     badge: "Administration",
   },
   {
     title: "Department",
     description:
       "Create a department account to manage assigned complaints and provide implementation updates.",
-    href: "/signup/department",
+    href: "/department/auth/sign-up",
     icon: Building2,
     accent: "bg-violet-50 text-violet-600",
     hover: "group-hover:bg-violet-600",
@@ -46,7 +49,7 @@ const roles = [
     title: "University",
     description:
       "Register as a university to collaborate on civic innovation, research and solution development.",
-    href: "/signup/university",
+    href: "/university/auth/sign-up",
     icon: GraduationCap,
     accent: "bg-emerald-50 text-emerald-600",
     hover: "group-hover:bg-emerald-600",
@@ -56,7 +59,7 @@ const roles = [
     title: "Partner",
     description:
       "Create a partner account to contribute through CSR, NGOs and collaborative civic initiatives.",
-    href: "/signup/partner",
+    href: "/partner/auth/sign-up",
     icon: Handshake,
     accent: "bg-amber-50 text-amber-600",
     hover: "group-hover:bg-amber-600",
@@ -85,18 +88,7 @@ export default function CreateAccountPage() {
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-6 lg:px-8">
         {/* Header */}
         <header className="flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-lg font-black text-white shadow-lg shadow-slate-950/15 transition group-hover:-translate-y-0.5">
-              S
-            </div>
-
-            <div>
-              <p className="text-lg font-bold tracking-tight">Samadhan</p>
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-400">
-                Civic Innovation
-              </p>
-            </div>
-          </Link>
+          <Logo href="/" subtitle="Civic Innovation" />
 
           <Link
             href="/login"
@@ -111,13 +103,13 @@ export default function CreateAccountPage() {
         <section className="flex flex-1 items-center justify-center py-14 lg:py-20">
           <div className="w-full max-w-6xl">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-4 py-2 text-xs font-bold text-indigo-600 shadow-sm">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-4 py-2 text-xs font-bold text-[#401AD9] shadow-sm">
                 <Sparkles className="h-3.5 w-3.5" />
                 Create your Samadhan account
               </div>
 
               <h1 className="text-4xl font-black tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-6xl">
-                Join <span className="text-indigo-600">Samadhan</span>
+                Join <span className="text-[#401AD9]">Samadhan</span>
               </h1>
 
               <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-500 sm:text-lg">
@@ -162,7 +154,7 @@ export default function CreateAccountPage() {
 
               <Link
                 href="/login"
-                className="ml-2 text-sm font-bold text-indigo-600 transition hover:text-indigo-700"
+                className="ml-2 text-sm font-bold text-[#401AD9] transition hover:text-indigo-700"
               >
                 Sign In
                 <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
@@ -193,7 +185,7 @@ function RoleCard({ role }: { role: any }) {
       href={role.href}
       className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-900/10"
     >
-      <div className="absolute left-0 right-0 top-0 h-1 origin-left scale-x-0 bg-indigo-600 transition-transform duration-300 group-hover:scale-x-100" />
+      <div className="absolute left-0 right-0 top-0 h-1 origin-left scale-x-0 bg-[#401AD9] transition-transform duration-300 group-hover:scale-x-100" />
 
       <div className="flex items-start justify-between">
         <div
@@ -221,7 +213,7 @@ function RoleCard({ role }: { role: any }) {
         {role.description}
       </p>
 
-      <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-5 text-xs font-bold text-slate-700 transition group-hover:text-indigo-600">
+      <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-5 text-xs font-bold text-slate-700 transition group-hover:text-[#401AD9]">
         Create {role.title} Account
         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
       </div>

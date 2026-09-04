@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -14,6 +14,8 @@ import {
   FolderKanban,
 } from "lucide-react";
 
+import Logo from "@/components/ui/Logo";
+
 export default function UniversityLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -21,16 +23,7 @@ export default function UniversityLogin() {
 
   function handleSubmit(event) {
     event.preventDefault();
-
-    // Dummy authentication for now.
-    // Later this will call the backend authentication API.
-    console.log({
-      email,
-      password,
-      role: "university",
-    });
-
-    window.location.href = "/university/dashboard";
+    window.location.href = "/university/auth/sign-in";
   }
 
   return (
@@ -47,21 +40,7 @@ export default function UniversityLogin() {
           <div className="relative flex w-full flex-col justify-between p-12 xl:p-16">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-lg font-black text-slate-950">
-                S
-              </div>
-
-              <div>
-                <p className="text-lg font-bold text-white">
-                  Samadhan
-                </p>
-
-                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500">
-                  Civic Innovation
-                </p>
-              </div>
-            </Link>
+            <Logo href="/" subtitle="Civic Innovation" />
 
             {/* Hero */}
             <div className="max-w-lg">
@@ -127,19 +106,7 @@ export default function UniversityLogin() {
 
             {/* Mobile logo */}
             <div className="lg:hidden">
-
-              <Link href="/" className="flex items-center gap-3">
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 font-black text-white">
-                  S
-                </div>
-
-                <p className="font-bold">
-                  Samadhan
-                </p>
-
-              </Link>
-
+              <Logo href="/" size="sm" />
             </div>
 
             {/* Heading */}

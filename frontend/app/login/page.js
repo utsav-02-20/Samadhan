@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   ArrowRight,
   Building2,
@@ -11,6 +11,8 @@ import {
   ChevronLeft,
 } from "lucide-react";
 
+import Logo from "@/components/ui/Logo";
+
 const roles = [
   {
     title: "Citizen",
@@ -18,7 +20,7 @@ const roles = [
     description:
       "Raise civic challenges, follow submissions and stay connected with their progress.",
     // href: "/login/citizen",
-    href:`/citizen/auth/sign-in`,
+    href: `/citizen/auth/sign-in`,
     icon: Users,
     accent: "bg-blue-50 text-blue-600",
     hover: "group-hover:bg-blue-600",
@@ -30,9 +32,10 @@ const roles = [
     description:
       "Review challenges, assign departments, approve solutions and oversee projects.",
     href: "/login/government",
+    //href: "/government/auth/sign-in",
     icon: Landmark,
-    accent: "bg-indigo-50 text-indigo-600",
-    hover: "group-hover:bg-indigo-600",
+    accent: "bg-indigo-50 text-[#401AD9]",
+    hover: "group-hover:bg-[#401AD9]",
     badge: "Administration",
   },
   {
@@ -40,7 +43,8 @@ const roles = [
     short: "D",
     description:
       "Manage assigned challenges, execute projects and report implementation progress.",
-    href: "/login/department",
+    // href: "/login/department",
+    href: "/department/auth/sign-in",
     icon: Building2,
     accent: "bg-violet-50 text-violet-600",
     hover: "group-hover:bg-violet-600",
@@ -52,6 +56,7 @@ const roles = [
     description:
       "Discover civic challenges and collaborate on innovative solutions and projects.",
     href: "/login/university",
+    // href: "/university/auth/sign-in",
     icon: GraduationCap,
     accent: "bg-emerald-50 text-emerald-600",
     hover: "group-hover:bg-emerald-600",
@@ -63,6 +68,7 @@ const roles = [
     description:
       "Collaborate with Samadhan on projects, initiatives and meaningful civic impact.",
     href: "/login/partner",
+    //href: "/partner/auth/sign-in",
     icon: Handshake,
     accent: "bg-amber-50 text-amber-600",
     hover: "group-hover:bg-amber-600",
@@ -93,21 +99,7 @@ export default function LoginPage() {
 
         {/* Navbar */}
         <header className="flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-lg font-black text-white shadow-lg shadow-slate-950/15 transition group-hover:-translate-y-0.5">
-              S
-            </div>
-
-            <div>
-              <p className="text-lg font-bold tracking-tight">
-                Samadhan
-              </p>
-
-              <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-400">
-                Civic Innovation
-              </p>
-            </div>
-          </Link>
+          <Logo href="/" subtitle="Civic Innovation" />
 
           <Link
             href="/"
@@ -125,14 +117,14 @@ export default function LoginPage() {
             {/* Heading */}
             <div className="mx-auto max-w-3xl text-center">
 
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-4 py-2 text-xs font-bold text-indigo-600 shadow-sm">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50/80 px-4 py-2 text-xs font-bold text-[#401AD9] shadow-sm">
                 <Sparkles className="h-3.5 w-3.5" />
                 Secure platform access
               </div>
 
               <h1 className="text-4xl font-black tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-6xl">
                 Welcome to{" "}
-                <span className="text-indigo-600">Samadhan</span>
+                <span className="text-[#401AD9]">Samadhan</span>
               </h1>
 
               <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-500 sm:text-lg">
@@ -179,7 +171,7 @@ export default function LoginPage() {
 
               <Link
                 href="/create-account"
-                className="ml-2 text-sm font-bold text-indigo-600 transition hover:text-indigo-700"
+                className="ml-2 text-sm font-bold text-[#401AD9] transition hover:text-indigo-700"
               >
                 Create an account
                 <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
@@ -211,7 +203,7 @@ function RoleCard({ role }) {
       className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-900/10"
     >
       {/* Top accent */}
-      <div className="absolute left-0 right-0 top-0 h-1 origin-left scale-x-0 bg-indigo-600 transition-transform duration-300 group-hover:scale-x-100" />
+      <div className="absolute left-0 right-0 top-0 h-1 origin-left scale-x-0 bg-[#401AD9] transition-transform duration-300 group-hover:scale-x-100" />
 
       <div className="flex items-start justify-between">
 
@@ -240,7 +232,7 @@ function RoleCard({ role }) {
         {role.description}
       </p>
 
-      <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-5 text-xs font-bold text-slate-700 transition group-hover:text-indigo-600">
+      <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-5 text-xs font-bold text-slate-700 transition group-hover:text-[#401AD9]">
         Continue as {role.title}
         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
       </div>

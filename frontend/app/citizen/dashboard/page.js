@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -13,57 +14,24 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const reports = [
-  {
-    id: "SAM-1024",
-    title: "Broken street light",
-    category: "Infrastructure",
-    location: "Main Market Road",
-    status: "UNDER_REVIEW",
-    date: "28 Aug 2026",
-  },
-  {
-    id: "SAM-1018",
-    title: "Garbage accumulation",
-    category: "Sanitation",
-    location: "Sector 4 Community Park",
-    status: "ACCEPTED",
-    date: "24 Aug 2026",
-  },
-  {
-    id: "SAM-1007",
-    title: "Damaged road",
-    category: "Roads",
-    location: "University Road",
-    status: "RESOLVED",
-    date: "18 Aug 2026",
-  },
-];
+import Logo from "@/components/ui/Logo";
+import { useCitizenAutoRegister } from "@/hooks/useCitizen";
+import { useUser, useAuth, UserButton } from "@clerk/nextjs";
+import { getCitizenHistory, toReportView } from "@/services/citizen.service";
 
-const statusConfig = {
-  SUBMITTED: {
-    label: "Submitted",
-    icon: Clock3,
-    className: "bg-slate-100 text-slate-600",
-  },
-  UNDER_REVIEW: {
-    label: "Under review",
-    icon: AlertCircle,
-    className: "bg-amber-50 text-amber-700",
-  },
-  ACCEPTED: {
-    label: "Accepted",
-    icon: CheckCircle2,
-    className: "bg-blue-50 text-blue-700",
-  },
-  RESOLVED: {
-    label: "Resolved",
-    icon: CheckCircle2,
-    className: "bg-emerald-50 text-emerald-700",
-  },
-};
+import { REPORT_STATUS_CONFIG as statusConfig } from "@/data/demoData";
 
 export default function CitizenDashboard() {
+  useCitizenAutoRegister();
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const [reports, setReports] = useState([]);
+  useEffect(() => {
+    if (!user) return;
+    getToken().then((token) => getCitizenHistory(user.id, token || undefined))
+      .then((res) => setReports((res?.data || []).map(toReportView)))
+      .catch((err) => console.error("Could not load reports:", err));
+  }, [user, getToken]);
   const pendingCount = reports.filter(
     (report) =>
       report.status === "SUBMITTED" ||
@@ -86,37 +54,26 @@ export default function CitizenDashboard() {
 
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-6 lg:px-8">
 
-          <Link href="/" className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
-            </div>
-
-            <div>
-              <p className="font-bold tracking-tight">
-                Samadhan
-              </p>
-
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                Citizen Portal
-              </p>
-            </div>
-
-          </Link>
+          <Logo href="/" subtitle="Citizen Portal" />
 
           <div className="flex items-center gap-4">
 
             <Link
               href="/citizen/report"
-              className="hidden items-center gap-2 rounded-xl  px-4 py-2.5 text-sm font-bold text-white transition  sm:flex"
+              className="hidden items-center gap-2 rounded-xl bg-royal-gradient px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition hover:shadow-lg sm:flex"
             >
               <Plus className="h-4 w-4" />
               Report issue
             </Link>
 
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
-              SJ
-            </div>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+                },
+              }}
+            />
 
           </div>
 
@@ -128,11 +85,11 @@ export default function CitizenDashboard() {
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
 
         {/* Welcome */}
-        <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-7 py-8 shadow-xl sm:px-10 sm:py-10">
+        <section className="relative overflow-hidden rounded-3xl bg-royal-gradient px-7 py-8 text-white shadow-2xl shadow-indigo-600/25 sm:px-10 sm:py-10">
 
-          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-blue-600/20 blur-3xl" />
+          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
-          <div className="absolute -bottom-32 right-1/4 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="absolute -bottom-32 right-1/4 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl" />
 
           <div className="relative max-w-2xl">
 
@@ -150,14 +107,23 @@ export default function CitizenDashboard() {
               submission to resolution.
             </p>
 
-            <Link
-              href="/citizen/report"
-              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <Plus className="h-4 w-4" />
-              Report a civic issue
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/citizen/report"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold !text-[#401AD9] shadow-lg transition hover:-translate-y-0.5 hover:bg-indigo-50"
+              >
+                <Plus className="h-4 w-4" />
+                Report a civic issue
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/citizen/reports"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/15 px-5 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/25 hover:-translate-y-0.5"
+              >
+                Browse All Community Problems
+              </Link>
+            </div>
 
           </div>
 

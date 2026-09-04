@@ -14,24 +14,32 @@ import {
   X,
 } from "lucide-react";
 
+import { useUser, useAuth, UserButton } from "@clerk/nextjs";
+import Logo from "@/components/ui/Logo";
+import { submitComplaint } from "@/services/citizen.service";
+
 const categories = [
   "Roads",
   "Street Lights",
   "Sanitation",
   "Water Supply",
-  "Public Safety",
+  "Electricity",
   "Drainage",
-  "Environment",
+  "Healthcare",
   "Other",
 ];
 
 export default function ReportIssuePage() {
+  const { user } = useUser();
+  const { getToken } = useAuth();
   const fileInputRef = useRef(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
+  const [district, setDistrict] = useState("General");
   const [location, setLocation] = useState("");
+  const [coords, setCoords] = useState({ latitude: "", longitude: "" });
 
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
@@ -72,10 +80,11 @@ export default function ReportIssuePage() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-
-        setLocation(
-          `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-        );
+        setCoords({
+          latitude: latitude.toString(),
+          longitude: longitude.toString(),
+        });
+        setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
       },
       () => {
         alert("Please allow location access.");
@@ -96,26 +105,24 @@ export default function ReportIssuePage() {
     try {
       const formData = new FormData();
       formData.append("title", title);
-      formData.append("category", category);
       formData.append("description", description);
-      formData.append("location", location);
+      formData.append("category", category);
+      formData.append("district", district);
+      formData.append("locality", location || "General Locality");
+      formData.append("latitude", coords.latitude || "0");
+      formData.append("longitude", coords.longitude || "0");
       formData.append("images", photo);
 
-      const response = await fetch("http://localhost:5000/api/v1/citizens/default-citizen/complaints", {
-        method: "POST",
-        body: formData,
-      });
+      const token = await getToken();
+      const citizenId = user?.id || "default-citizen";
 
-      const resData = await response.json().catch(() => null);
+      const resData = await submitComplaint(citizenId, formData, token || undefined);
 
       const id = resData?.data?.complaintId || resData?.data?._id || ("SAM-" + Math.floor(1000 + Math.random() * 9000));
       setReportId(id);
       setSubmitted(true);
     } catch (err) {
-      console.warn("Backend connection offline, saving locally:", err);
-      const fallbackId = "SAM-" + Math.floor(1000 + Math.random() * 9000);
-      setReportId(fallbackId);
-      setSubmitted(true);
+      alert(err?.message || "Report could not be submitted. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -203,17 +210,16 @@ export default function ReportIssuePage() {
             Dashboard
           </Link>
 
-          <div className="flex items-center gap-3">
+          <Logo href="/" size="sm" />
 
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
-            </div>
-
-            <span className="font-bold">
-              Samadhan
-            </span>
-
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 

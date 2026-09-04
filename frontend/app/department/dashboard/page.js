@@ -1,246 +1,298 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import { getDepartmentChallenges } from "@/services/department.service";
+import Logo from "@/components/ui/Logo";
 import {
-  LayoutDashboard,
   Flag,
   FolderKanban,
-  Users,
   CheckCircle2,
   Clock3,
-  AlertCircle,
-  ArrowUpRight,
+  AlertTriangle,
+  ArrowRight,
+  MapPin,
+  Building2,
+  UserCheck,
+  GraduationCap,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
-
-const stats = [
-  ["Active Challenges", "12", Flag],
-  ["Ongoing Projects", "8", FolderKanban],
-  ["Pending Applications", "24", Clock3],
-  ["Resolved Issues", "186", CheckCircle2],
-];
-
-const projects = [
-  {
-    name: "Smart Traffic Optimization",
-    partner: "Tech Solutions Pvt. Ltd.",
-    progress: 72,
-  },
-  {
-    name: "Digital Grievance Platform",
-    partner: "CivicTech India",
-    progress: 48,
-  },
-  {
-    name: "Waste Collection System",
-    partner: "GreenTech Solutions",
-    progress: 31,
-  },
-];
+import {
+  DEPARTMENT_PROJECTS_DETAILED as projects,
+} from "@/data/departmentData";
 
 export default function DepartmentDashboard() {
+  const [challenges, setChallenges] = useState([]);
+  useEffect(() => {
+    getDepartmentChallenges().then((res) => setChallenges((res?.data || []).map((item) => ({
+      ...item, id: item._id || item.id, status: item.status === "Pending" ? "ROUTED" : item.status === "In Progress" ? "IN_PROGRESS" : item.status, slaStatus: "ON_TRACK", location: item.locality || item.district || "General Locality"
+    })))).catch((error) => console.error("Could not load department dashboard:", error));
+  }, []);
+  const pendingCount = challenges.filter((c) => c.status === "ROUTED" || c.status === "IN_PROGRESS").length;
+  const atRiskCount = challenges.filter((c) => c.slaStatus === "AT_RISK").length;
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="min-h-screen bg-slate-50 text-slate-950 pb-16">
+      {/* Header Navigation */}
+      <header className="sticky top-0 z-30 border-b border-indigo-100 bg-white/95 backdrop-blur shadow-sm">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <Logo href="/department/dashboard" subtitle="Department Portal" size="sm" />
 
-      <header className="border-b bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center px-6">
-
-          <Link href="/department/dashboard" className="font-black">
-            Samadhan
-          </Link>
-
-          <nav className="ml-auto flex gap-2">
+          <nav className="flex items-center gap-2">
             <Link
               href="/department/dashboard"
-              className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+              className="rounded-xl bg-royal-gradient px-3.5 py-2 text-xs font-bold !text-white shadow-sm shadow-indigo-600/20"
             >
               Dashboard
             </Link>
 
             <Link
               href="/department/challenges"
-              className="px-3 py-2 text-xs font-bold"
+              className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-600 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
-              Challenges
+              Routed Challenges
             </Link>
 
             <Link
               href="/department/projects"
-              className="px-3 py-2 text-xs font-bold"
+              className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-600 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
-              Projects
+              Projects & SLA
+            </Link>
+
+            <Link
+              href="/department/accepted-projects"
+              className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-600 transition hover:bg-indigo-50 hover:text-[#401AD9]"
+            >
+              University Collaborations
             </Link>
 
             <Link
               href="/department/profile"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-xs font-black text-violet-700"
+              className="ml-2 flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50/80 px-3 py-1 text-xs font-bold text-[#401AD9] transition hover:bg-indigo-100"
             >
-              DE
+              <UserCheck className="h-3.5 w-3.5" />
+              Department Officer
             </Link>
-          </nav>
 
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm ml-2",
+                },
+              }}
+            />
+          </nav>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      {/* Main Content Container */}
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+        {/* Banner Section */}
+        <section className="relative overflow-hidden rounded-3xl bg-royal-gradient p-7 text-white shadow-2xl shadow-indigo-600/25 sm:p-9">
+          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-32 right-1/3 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl" />
 
-        <p className="text-xs font-black uppercase tracking-widest text-violet-600">
-          Department Portal
-        </p>
-
-        <h1 className="mt-2 text-3xl font-black">
-          Department Dashboard
-        </h1>
-
-        <p className="mt-2 text-sm text-slate-500">
-          Monitor challenges, projects and citizen service activities.
-        </p>
-
-        {/* STATS */}
-
-        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map(([title, value, Icon]) => (
-            <div
-              key={title}
-              className="rounded-2xl border bg-white p-5 shadow-sm"
-            >
-              <Icon className="h-5 w-5 text-violet-600" />
-
-              <p className="mt-4 text-xs font-bold text-slate-400">
-                {title}
-              </p>
-
-              <p className="mt-1 text-2xl font-black">
-                {value}
-              </p>
+          <div className="relative max-w-3xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3.5 py-1 text-xs font-bold text-indigo-100 backdrop-blur-md">
+              <Building2 className="h-3.5 w-3.5" />
+              Department Operations & University Collaboration Grid
             </div>
-          ))}
-        </div>
 
-        {/* MAIN */}
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Process Routed Issues, Manage SLA & University Pilots
+            </h1>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-indigo-100">
+              Verify incoming civic grievances from government channels, track officer availability, manage university research projects, and update resolution progress in real-time.
+            </p>
 
-          {/* PROJECTS */}
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/department/challenges"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold !text-[#401AD9] shadow-lg transition hover:-translate-y-0.5 hover:bg-indigo-50"
+              >
+                Review Routed Challenges ({pendingCount})
+                <ArrowRight className="h-4 w-4" />
+              </Link>
 
-          <section className="rounded-2xl border bg-white p-6 shadow-sm lg:col-span-2">
+              <Link
+                href="/department/accepted-projects"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/15 px-5 py-2.5 text-xs font-bold text-white backdrop-blur-sm transition hover:bg-white/25 hover:-translate-y-0.5"
+              >
+                <GraduationCap className="h-4 w-4" />
+                University Projects (8)
+              </Link>
 
-            <div className="flex items-center justify-between">
+              <Link
+                href="/department/profile"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/15 px-5 py-2.5 text-xs font-bold text-white backdrop-blur-sm transition hover:bg-white/25 hover:-translate-y-0.5"
+              >
+                <UserCheck className="h-4 w-4" />
+                Department Profile & Officers
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Grid */}
+        <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard title="Routed Challenges" value="18" icon={Flag} accent="text-violet-600" />
+          <StatCard title="Active Assigned Issues" value="24" icon={Clock3} accent="text-amber-600" />
+          <StatCard title="At-Risk SLA Items" value={atRiskCount} icon={AlertTriangle} accent="text-red-500" />
+          <StatCard title="Resolved Issues" value="142" icon={CheckCircle2} accent="text-emerald-600" />
+        </section>
+
+        {/* Action Grid */}
+        <section className="mt-8 grid gap-7 lg:grid-cols-3">
+          {/* Recent Routed Challenges */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
+            <div className="flex items-center justify-between border-b border-slate-100 p-6">
               <div>
-                <h2 className="font-black">Active Projects</h2>
+                <h2 className="font-black text-slate-900">Recently Routed Challenges</h2>
                 <p className="mt-1 text-xs text-slate-400">
-                  Current department projects
+                  Civic issues requiring department verification and assignment.
                 </p>
               </div>
 
               <Link
-                href="/department/projects"
-                className="text-xs font-black text-violet-600"
+                href="/department/challenges"
+                className="text-xs font-bold text-violet-600 hover:text-violet-700"
               >
-                View all
+                View all routed →
               </Link>
             </div>
 
-            <div className="mt-5 space-y-4">
-
-              {projects.map((project) => (
-                <div
-                  key={project.name}
-                  className="rounded-xl bg-slate-50 p-4"
+            <div className="divide-y divide-slate-100">
+              {challenges.slice(0, 3).map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/department/challenges/${item.id}`}
+                  className="block p-5 transition hover:bg-slate-50"
                 >
-                  <div className="flex justify-between gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h3 className="text-sm font-black">
-                        {project.name}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-slate-400">{item.id}</span>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                            item.slaStatus === "AT_RISK"
+                              ? "bg-red-50 text-red-700 border border-red-200"
+                              : "bg-emerald-50 text-emerald-700"
+                          }`}
+                        >
+                          SLA: {item.slaStatus.replace("_", " ")}
+                        </span>
+                      </div>
 
-                      <p className="mt-1 text-xs text-slate-400">
-                        Partner: {project.partner}
-                      </p>
+                      <h3 className="mt-1.5 font-bold text-slate-900">{item.title}</h3>
+
+                      <div className="mt-2 flex flex-wrap gap-4 text-xs text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {item.location}
+                        </span>
+                        <span>Deadline: {item.slaDeadline}</span>
+                      </div>
                     </div>
 
-                    <span className="text-xs font-black">
-                      {project.progress}%
-                    </span>
+                    <ArrowRight className="hidden h-5 w-5 text-slate-300 sm:block" />
                   </div>
+                </Link>
+              ))}
+            </div>
+          </div>
 
-                  <div className="mt-3 h-2 rounded-full bg-slate-200">
-                    <div
-                      className="h-2 rounded-full bg-violet-600"
-                      style={{ width: `${project.progress}%` }}
-                    />
+          {/* SLA & University Quick Access */}
+          <div className="space-y-6">
+            {/* Department Quick Profile Card */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                    <UserCheck className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-xs">Department Profile</h3>
+                    <p className="text-[10px] font-semibold text-emerald-600">● 94.8% Resolution Rate</p>
                   </div>
                 </div>
-              ))}
 
-            </div>
+                <Link
+                  href="/department/profile"
+                  className="text-xs font-bold text-violet-600 hover:underline"
+                >
+                  Manage →
+                </Link>
+              </div>
 
-          </section>
+              <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-center text-xs">
+                <div className="rounded-xl bg-slate-50 p-2.5">
+                  <p className="text-[10px] text-slate-400 font-bold">Total Handled</p>
+                  <p className="font-black text-slate-900 mt-0.5">1,248</p>
+                </div>
 
-          {/* QUICK ACTIONS */}
-
-          <section className="rounded-2xl border bg-white p-6 shadow-sm">
-
-            <h2 className="font-black">Quick Actions</h2>
-
-            <div className="mt-5 space-y-3">
-
-              <Action
-                href="/department/departments/new"
-                icon={Flag}
-                text="Create Challenge"
-              />
-
-              <Action
-                href="/department/challenges"
-                icon={Users}
-                text="Review Applications"
-              />
-
-              <Action
-                href="/department/projects"
-                icon={FolderKanban}
-                text="Manage Projects"
-              />
-
-            </div>
-
-            <div className="mt-6 rounded-xl bg-amber-50 p-4">
-              <div className="flex gap-3">
-                <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
-
-                <div>
-                  <p className="text-xs font-black text-amber-800">
-                    Attention needed
-                  </p>
-
-                  <p className="mt-1 text-[10px] leading-4 text-amber-700">
-                    5 applications are waiting for review.
-                  </p>
+                <div className="rounded-xl bg-slate-50 p-2.5">
+                  <p className="text-[10px] text-slate-400 font-bold">Officers</p>
+                  <p className="font-black text-violet-700 mt-0.5">3 Active</p>
                 </div>
               </div>
             </div>
 
-          </section>
+            {/* Active Projects Status */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h2 className="font-black text-slate-900 text-sm">Active Execution Projects</h2>
+                <Link href="/department/accepted-projects" className="text-[11px] font-bold text-violet-600">
+                  Accepted (8) →
+                </Link>
+              </div>
 
-        </div>
+              <div className="mt-4 space-y-4">
+                {projects.map((proj) => (
+                  <div key={proj.id} className="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span className="text-slate-900">{proj.name}</span>
+                      <span className="text-violet-600">{proj.progress}%</span>
+                    </div>
 
+                    <div className="mt-2 h-2 rounded-full bg-slate-200">
+                      <div
+                        className="h-2 rounded-full bg-violet-600"
+                        style={{ width: `${proj.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/department/projects"
+                className="mt-5 block rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Manage Projects & SLA →
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
 }
 
-function Action({ href, icon: Icon, text }) {
+function StatCard({ title, value, icon: Icon, accent }) {
   return (
-    <Link
-      href={href}
-      className="flex items-center justify-between rounded-xl border p-4 hover:bg-slate-50"
-    >
-      <span className="flex items-center gap-3 text-xs font-black">
-        <Icon className="h-4 w-4 text-violet-600" />
-        {text}
-      </span>
-
-      <ArrowUpRight className="h-4 w-4 text-slate-400" />
-    </Link>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
+          <Icon className={`h-5 w-5 ${accent}`} />
+        </div>
+      </div>
+      <p className="mt-4 text-xs font-bold text-slate-400">{title}</p>
+      <p className="mt-1 text-2xl font-black text-slate-900">{value}</p>
+    </div>
   );
 }

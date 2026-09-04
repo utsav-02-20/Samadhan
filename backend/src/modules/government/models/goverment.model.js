@@ -54,4 +54,35 @@ const governmentSchema = new mongoose.Schema(
 
 const Government = mongoose.model("Government", governmentSchema);
 
+const challengeSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    description: String,
+    targetDepartment: String,
+    assignedDepartmentId: String,
+    district: String,
+    budget: String,
+    slaDays: {
+      type: Number,
+      default: 14,
+    },
+    status: {
+      type: String,
+      enum: ["OPEN", "ACCEPTED", "ROUTED", "IN_PROGRESS", "RESOLVED", "REJECTED", "NEEDS_INFO"],
+      default: "OPEN",
+    },
+    decisionReason: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+export const Challenge = mongoose.model("Challenge", challengeSchema);
+
 export default Government;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 
+// demo data for a challenge
 const challenge = {
   id: "SAM-1042",
   title: "Smart Waste Collection System",
@@ -88,8 +90,14 @@ export default function ChallengeDetailsPage() {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+                <Image
+                  src="/logo.png"
+                  alt="Samadhan Logo"
+                  width={60}
+                  height={60}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div>

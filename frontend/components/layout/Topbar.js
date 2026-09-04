@@ -53,7 +53,7 @@ export default function Topbar({ role = "government" }) {
         >
           ♢
 
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-indigo-600" />
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#401AD9]" />
         </button>
 
 
@@ -66,7 +66,7 @@ export default function Topbar({ role = "government" }) {
             className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 transition hover:bg-slate-50"
           >
 
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-sm font-bold text-indigo-700">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#401AD9]/10 text-sm font-bold text-[#401AD9]">
               {roleName.charAt(0)}
             </div>
 

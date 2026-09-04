@@ -25,51 +25,47 @@ import { z } from "zod";
 export const registerCitizenSchema = z.object({
   clerkId: z.string().min(1, "Clerk ID is required"),
 
-  fullName: z.string().min(3, "Full name must be at least 3 characters"),
+  fullName: z.string().optional().default("Citizen User"),
 
-  email: z.string().email("Invalid email address"),
+  name: z.string().optional(),
 
-  phone: z
-    .string()
-    .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number")
-    .optional(),
+  email: z.string().optional().default("citizen@samadhan.gov.in"),
 
-  district: z.string().min(2, "District is required"),
-});
+  phone: z.string().optional(),
+
+  district: z.string().optional().default("General"),
+}).transform((val) => ({
+  clerkId: val.clerkId,
+  fullName: val.fullName || val.name || "Citizen User",
+  email: val.email || "citizen@samadhan.gov.in",
+  phone: val.phone || "",
+  district: val.district || "General",
+}));
 
 /* -------------------------------------------------------------------------- */
 /* Problem Submission Validation                                               */
 /* -------------------------------------------------------------------------- */
 
 export const problemSubmissionSchema = z.object({
-  title: z.string().min(5).max(120),
+  title: z.string().min(3).max(120),
 
-  description: z.string().min(15).max(1000),
+  description: z.string().min(5).max(1000),
 
-  category: z.enum([
-    "Water Supply",
-    "Roads",
-    "Electricity",
-    "Sanitation",
-    "Healthcare",
-    "Education",
-    "Garbage",
-    "Drainage",
-    "Street Lights",
-    "Public Transport",
-    "Other",
-  ]),
+  category: z.string().min(2),
 
-  district: z.string().min(2),
+  district: z.string().optional().default("General"),
 
-  locality: z.string().min(2),
+  locality: z.string().optional().default("General Locality"),
 
-  location: z.object({
-    latitude: z.number().min(-90).max(90),
-    longitude: z.number().min(-180).max(180),
-  }),
+  location: z
+    .object({
+      latitude: z.union([z.number(), z.string()]).transform(val => Number(val) || 0),
+      longitude: z.union([z.number(), z.string()]).transform(val => Number(val) || 0),
+    })
+    .optional()
+    .default({ latitude: 0, longitude: 0 }),
 
-  images: z.array(z.string().url()).optional(),
+  images: z.array(z.string()).optional(),
 });
 
 /* -------------------------------------------------------------------------- */

@@ -56,10 +56,6 @@ const citizenSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        phone: {
-            type: String,
-            default: "",
-        },
 
         profileComplete: {
             type: Boolean,

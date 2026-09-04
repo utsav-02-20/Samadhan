@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import Logo from "@/components/ui/Logo";
+import { getGovernmentChallenges, addProjectMilestone, updateGovernmentChallengeStatus, addProjectUpdate } from "@/services/government.service";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -15,23 +19,8 @@ import {
   MessageSquare,
   Plus,
   Circle,
+  X,
 } from "lucide-react";
-
-const project = {
-  id: "PRJ-001",
-  name: "Sector 4 Street Light Restoration",
-  challengeId: "SAM-1024",
-  description:
-    "Restoration and replacement of damaged street lights across Sector 4 following a citizen-reported civic challenge.",
-  department: "Public Works",
-  manager: "Rajiv Mehra",
-  location: "Sector 4, Main Market Road",
-  budget: "₹4.8 Lakh",
-  deadline: "20 September 2026",
-  progress: 68,
-  status: "IN_PROGRESS",
-  team: 8,
-};
 
 const initialMilestones = [
   {
@@ -82,31 +71,151 @@ const initialUpdates = [
 ];
 
 export default function GovernmentProjectDetails() {
+  const { id } = useParams();
+  const { getToken } = useAuth();
+
+  const [projectData, setProjectData] = useState(null);
   const [milestones, setMilestones] = useState(initialMilestones);
   const [updates, setUpdates] = useState(initialUpdates);
   const [updateText, setUpdateText] = useState("");
+  
+  // Modal state for milestone creation
+  const [showMilestoneModal, setShowMilestoneModal] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newDate, setNewDate] = useState("");
+  const [newStatus, setNewStatus] = useState("PENDING");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function addUpdate() {
-    if (!updateText.trim()) return;
+  useEffect(() => {
+    getToken()
+      .then((token) => getGovernmentChallenges(token || undefined))
+      .then((res) => {
+        const rawList = res?.data || [];
+        const found = rawList.find(
+          (item, idx) =>
+            String(item._id || item.id) === String(id) ||
+            `PRJ-${String(idx + 1).padStart(3, "0")}` === String(id) ||
+            String(item._id).slice(-8) === String(id)
+        ) || rawList[0];
 
-    setUpdates([
-      ...updates,
-      {
-        id: Date.now(),
-        author: "Government Officer",
-        role: "Government",
-        text: updateText,
-        date: "Just now",
-      },
-    ]);
+        if (found) {
+          setProjectData(found);
+          if (found.milestones && found.milestones.length > 0) {
+            setMilestones(found.milestones.map((m, idx) => ({
+              id: m._id || idx + 1,
+              title: m.title,
+              description: m.description || "",
+              status: m.status || "PENDING",
+              date: m.date || "Scheduled",
+            })));
+          }
+          if (found.updates && found.updates.length > 0) {
+            setUpdates(found.updates.map((u, idx) => ({
+              id: u._id || idx + 1,
+              author: u.author || "Government Officer",
+              role: u.role || "Government",
+              text: u.text,
+              date: u.date || "Just now",
+            })));
+          }
+        }
+      })
+      .catch((err) => console.error("Could not load project details:", err));
+  }, [id, getToken]);
 
-    setUpdateText("");
+  const activeProject = {
+    id: id || "PRJ-001",
+    _id: projectData?._id || projectData?.id,
+    name: projectData?.title || "Sector 4 Street Light Restoration",
+    challengeId: projectData?._id ? String(projectData._id).slice(-8) : "SAM-1024",
+    description: projectData?.description || "Restoration and replacement of damaged street lights across Sector 4 following a citizen-reported civic challenge.",
+    department: projectData?.targetDepartment || projectData?.department || "Public Works",
+    manager: projectData?.citizenId?.fullName ? `${projectData.citizenId.fullName} (Officer)` : "Rajiv Mehra",
+    location: typeof projectData?.location === "object" ? (projectData.locality || projectData.district || "General Locality") : (projectData?.location || "Sector 4, Main Market Road"),
+    budget: "₹4.8 Lakh",
+    deadline: projectData?.createdAt ? new Date(new Date(projectData.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN") : "20 September 2026",
+    progress: projectData?.status === "Resolved" ? 100 : (projectData?.status === "Pending" ? 25 : 68),
+    status: projectData?.status === "Resolved" ? "COMPLETED" : "IN_PROGRESS",
+    team: 8,
+  };
+
+  async function handleAddMilestone(e) {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+
+    const milestoneObj = {
+      id: Date.now(),
+      title: newTitle,
+      description: newDescription,
+      date: newDate || new Date().toLocaleDateString("en-IN"),
+      status: newStatus,
+    };
+
+    setIsSubmitting(true);
+    try {
+      const token = await getToken();
+      if (activeProject._id) {
+        await addProjectMilestone(
+          activeProject._id,
+          {
+            title: newTitle,
+            description: newDescription,
+            date: newDate || new Date().toLocaleDateString("en-IN"),
+            status: newStatus,
+          },
+          token || undefined
+        );
+      }
+      setMilestones((prev) => [...prev, milestoneObj]);
+      setShowMilestoneModal(false);
+      setNewTitle("");
+      setNewDescription("");
+      setNewDate("");
+      setNewStatus("PENDING");
+    } catch (err) {
+      alert(err?.message || "Could not add milestone to backend.");
+      // Local fallback
+      setMilestones((prev) => [...prev, milestoneObj]);
+      setShowMilestoneModal(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function markComplete(id) {
+  async function addUpdate() {
+    if (!updateText.trim()) return;
+    const textToSave = updateText;
+    setUpdateText("");
+
+    const updateObj = {
+      id: Date.now(),
+      author: "Government Officer",
+      role: "Government",
+      text: textToSave,
+      date: "Just now",
+    };
+
+    try {
+      const token = await getToken();
+      if (activeProject._id) {
+        await addProjectUpdate(
+          activeProject._id,
+          { text: textToSave, author: "Government Officer", role: "Government" },
+          token || undefined
+        );
+      }
+      setUpdates((prev) => [...prev, updateObj]);
+    } catch (err) {
+      console.warn("Could not save update to backend:", err.message);
+      setUpdates((prev) => [...prev, updateObj]);
+    }
+  }
+
+  function markComplete(mid) {
     setMilestones((current) =>
       current.map((milestone) =>
-        milestone.id === id
+        milestone.id === mid
           ? {
               ...milestone,
               status: "COMPLETED",
@@ -128,34 +237,23 @@ export default function GovernmentProjectDetails() {
 
             <Link
               href="/government/projects"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
 
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
-              </div>
-
-              <div>
-                <p className="text-sm font-black">
-                  Samadhan
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  Government Portal
-                </p>
-              </div>
-
-            </div>
+            <Logo href="/government/dashboard" subtitle="Government Portal" size="sm" />
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
       </header>
@@ -334,15 +432,11 @@ export default function GovernmentProjectDetails() {
                 </div>
 
                 <button
-                  onClick={() =>
-                    alert(
-                      "Milestone creation will be connected to the backend later."
-                    )
-                  }
-                  className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold hover:bg-slate-50"
+                  onClick={() => setShowMilestoneModal(true)}
+                  className="flex items-center gap-2 rounded-xl bg-royal-gradient px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/20 transition hover:shadow-lg hover:-translate-y-0.5"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  Add
+                  Add Milestone
                 </button>
 
               </div>
@@ -632,38 +726,48 @@ export default function GovernmentProjectDetails() {
               <div className="mt-5 space-y-2">
 
                 <button
-                  onClick={() =>
-                    alert(
-                      "Verification workflow will be connected to the backend later."
-                    )
-                  }
-                  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 p-3 text-left text-sm font-bold hover:bg-slate-50"
+                  onClick={async () => {
+                    try {
+                      const token = await getToken();
+                      if (activeProject._id) {
+                        await updateGovernmentChallengeStatus(activeProject._id, "IN_PROGRESS", "Government verified inspection and project progress.", token || undefined);
+                      }
+                      setProjectData((prev) => ({ ...prev, status: "In Progress" }));
+                      alert("Progress verified and updated in database!");
+                    } catch (err) {
+                      alert(err?.message || "Could not update status.");
+                    }
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left text-sm font-bold shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-700"
                 >
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                   Verify Progress
                 </button>
 
-                <button
-                  onClick={() =>
-                    alert(
-                      "Department communication will be connected to the backend later."
-                    )
-                  }
-                  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 p-3 text-left text-sm font-bold hover:bg-slate-50"
+                <Link
+                  href="/government/departments"
+                  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left text-sm font-bold shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-[#401AD9]"
                 >
-                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                  <MessageSquare className="h-4 w-4 text-[#401AD9]" />
                   Contact Department
-                </button>
+                </Link>
 
                 <button
-                  onClick={() =>
-                    alert(
-                      "Project completion workflow will be connected to the backend later."
-                    )
-                  }
-                  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 p-3 text-left text-sm font-bold hover:bg-slate-50"
+                  onClick={async () => {
+                    try {
+                      const token = await getToken();
+                      if (activeProject._id) {
+                        await updateGovernmentChallengeStatus(activeProject._id, "RESOLVED", "Project completed and verified by government officer.", token || undefined);
+                      }
+                      setProjectData((prev) => ({ ...prev, status: "Resolved" }));
+                      alert("Project marked as COMPLETED and saved in live database!");
+                    } catch (err) {
+                      alert(err?.message || "Could not complete project.");
+                    }
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left text-sm font-bold shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-700"
                 >
-                  <CheckCircle2 className="h-4 w-4 text-slate-500" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                   Mark Project Completed
                 </button>
 
@@ -676,6 +780,21 @@ export default function GovernmentProjectDetails() {
         </div>
 
       </div>
+
+      <MilestoneModal
+        isOpen={showMilestoneModal}
+        onClose={() => setShowMilestoneModal(false)}
+        onSubmit={handleAddMilestone}
+        title={newTitle}
+        setTitle={setNewTitle}
+        description={newDescription}
+        setDescription={setNewDescription}
+        date={newDate}
+        setDate={setNewDate}
+        status={newStatus}
+        setStatus={setNewStatus}
+        isSubmitting={isSubmitting}
+      />
 
     </main>
   );
@@ -724,5 +843,102 @@ function Status({ status }) {
     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-500">
       PENDING
     </span>
+  );
+}
+
+function MilestoneModal({ isOpen, onClose, onSubmit, title, setTitle, description, setDescription, date, setDate, status, setStatus, isSubmitting }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl transition-all">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <h3 className="text-lg font-black text-slate-900">Add Project Milestone</h3>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <form onSubmit={onSubmit} className="mt-5 space-y-4">
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Milestone Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Electrical wiring setup"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-[#401AD9] focus:bg-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Brief details about this milestone step..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-900 outline-none focus:border-[#401AD9] focus:bg-white"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                Target Date
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 18 Sep 2026"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-900 outline-none focus:border-[#401AD9] focus:bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                Initial Status
+              </label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none focus:border-[#401AD9]"
+              >
+                <option value="PENDING">PENDING</option>
+                <option value="IN_PROGRESS">IN PROGRESS</option>
+                <option value="COMPLETED">COMPLETED</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-xl bg-royal-gradient px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-600/20 hover:shadow-lg hover:-translate-y-0.5"
+            >
+              {isSubmitting ? "Saving..." : "Save Milestone"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -1,11 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
-  ShieldCheck,
-  Users,
-  Building2,
-  GraduationCap,
   ArrowRight,
   Activity,
   Trophy,
@@ -16,94 +13,20 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-const roles = [
-  {
-    title: "Citizen",
-    description:
-      "Report civic issues, upload evidence and track resolution progress.",
-    href: "/citizen/dashboard",
-    icon: Users,
-    color: "blue",
-  },
-  {
-    title: "Government",
-    description:
-      "Create challenges, manage departments and monitor civic projects.",
-    href: "/government/dashboard",
-    icon: ShieldCheck,
-    color: "violet",
-  },
-  {
-    title: "Department",
-    description:
-      "Handle assigned challenges, projects and implementation updates.",
-    href: "/department/dashboard",
-    icon: Building2,
-    color: "amber",
-  },
-  {
-    title: "University",
-    description:
-      "Participate in civic challenges and build solutions with student teams.",
-    href: "/university/dashboard",
-    icon: GraduationCap,
-    color: "emerald",
-  },
-];
+import { PORTAL_ROLES, DASHBOARD_STATS as stats, PLATFORM_ACTIVITIES as activity } from "@/data/demoData";
+import { Users, ShieldCheck, Building2, GraduationCap } from "lucide-react";
 
-const stats = [
-  {
-    label: "Active Challenges",
-    value: "128",
-    change: "+12%",
-    icon: Trophy,
-  },
-  {
-    label: "Issues Reported",
-    value: "2,486",
-    change: "+18%",
-    icon: MapPin,
-  },
-  {
-    label: "Projects Running",
-    value: "74",
-    change: "+9%",
-    icon: Activity,
-  },
-  {
-    label: "Issues Resolved",
-    value: "1,932",
-    change: "+24%",
-    icon: CheckCircle2,
-  },
-];
+const roleIconMap = {
+  Users,
+  ShieldCheck,
+  Building2,
+  GraduationCap,
+};
 
-const activity = [
-  {
-    title: "New civic challenge launched",
-    description: "Smart City Traffic Optimization",
-    time: "12 min ago",
-    icon: Trophy,
-  },
-  {
-    title: "Issue resolved",
-    description: "Street lighting problem · Ward 12",
-    time: "38 min ago",
-    icon: CheckCircle2,
-  },
-  {
-    title: "University submission received",
-    description: "Road Safety Analytics",
-    time: "1 hour ago",
-    icon: FileCheck2,
-  },
-  {
-    title: "Challenge assigned",
-    description: "Waste Management Department",
-    time: "2 hours ago",
-    icon: Building2,
-  },
-];
+const roles = PORTAL_ROLES.map((role) => ({
+  ...role,
+  icon: roleIconMap[role.icon] || Users,
+}));
 
 export default function AppDashboard() {
   return (
@@ -120,8 +43,14 @@ export default function AppDashboard() {
             className="flex items-center gap-3"
           >
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-lg font-black text-white">
-              S
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+              <Image
+                src="/logo.png"
+                alt="Samadhan Logo"
+                width={60}
+                height={60}
+                className="h-full w-full object-cover"
+              />
             </div>
 
             <div>

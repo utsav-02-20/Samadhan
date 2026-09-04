@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import Logo from "@/components/ui/Logo";
+import { getGovernmentChallenges, updateGovernmentChallengeStatus, assignChallengeToDepartment } from "@/services/government.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,7 +20,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-const challenge = {
+const defaultChallenge = {
   id: "SAM-1024",
   title: "Broken street lights in residential area",
   description:
@@ -76,6 +80,16 @@ const departments = [
 ];
 
 export default function GovernmentChallengeDetails() {
+  const { id } = useParams();
+  const { getToken } = useAuth();
+  const [challenge, setChallenge] = useState(defaultChallenge);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    getToken().then((token) => getGovernmentChallenges(token || undefined)).then((res) => {
+      const item = (res?.data || []).find((value) => String(value._id || value.id) === String(id));
+      if (item) setChallenge({ ...defaultChallenge, ...item, id: item._id || item.id, department: item.targetDepartment || "Unassigned", status: item.status === "OPEN" ? "SUBMITTED" : item.status, submittedDate: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : defaultChallenge.submittedDate, decisionReason: item.decisionReason || "" });
+    }).catch((error) => setMessage(error.message)).finally(() => setLoading(false));
+  }, [id, getToken]);
   const [currentStatus, setCurrentStatus] = useState(
     challenge.status
   );
@@ -84,6 +98,7 @@ export default function GovernmentChallengeDetails() {
     useState(challenge.department);
 
   const [note, setNote] = useState("");
+  const [decisionReason, setDecisionReason] = useState("");
 
   const [notes, setNotes] = useState([
     {
@@ -104,21 +119,14 @@ export default function GovernmentChallengeDetails() {
 
   const [message, setMessage] = useState("");
 
-  function handleStatusChange(status) {
-    setCurrentStatus(status);
-
-    if (status === "ACCEPTED") {
-      setMessage("Challenge accepted successfully.");
-    }
-
-    if (status === "REJECTED") {
-      setMessage("Challenge rejected.");
-    }
-
-    if (status === "NEEDS_INFO") {
-      setMessage("Additional information requested.");
-    }
-
+  async function handleStatusChange(status, reason = "") {
+    try {
+      const token = await getToken();
+      const res = await updateGovernmentChallengeStatus(id || challenge.id, status, reason, token || undefined);
+      setChallenge((value) => ({ ...value, ...res.data, targetDepartment: res.data.targetDepartment || value.targetDepartment }));
+      setCurrentStatus(status);
+      setMessage(status === "ACCEPTED" ? "Challenge accepted successfully." : "Challenge updated successfully.");
+    } catch (error) { setMessage(error.message || "Could not update challenge."); return; }
     setTimeout(() => setMessage(""), 3000);
   }
 
@@ -137,7 +145,11 @@ export default function GovernmentChallengeDetails() {
     setNote("");
   }
 
-  function assignDepartment() {
+  async function assignDepartment() {
+    try {
+      const token = await getToken();
+      await assignChallengeToDepartment({ challengeId: id || challenge.id, departmentId: selectedDepartment, departmentName: selectedDepartment }, token || undefined);
+    } catch (error) { setMessage(error.message || "Could not assign department."); return; }
     setShowAssignModal(false);
 
     setCurrentStatus("ASSIGNED");
@@ -161,35 +173,24 @@ export default function GovernmentChallengeDetails() {
           <div className="flex items-center gap-4">
 
             <Link
-              href="/government/challenges"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+              href="/government/dashboard"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
 
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
-              </div>
-
-              <div>
-                <p className="text-sm font-black">
-                  Samadhan
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  Government Portal
-                </p>
-              </div>
-
-            </div>
+            <Logo href="/government/dashboard" subtitle="Government Portal" size="sm" />
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 
@@ -310,13 +311,17 @@ export default function GovernmentChallengeDetails() {
 
                 <InfoItem
                   label="Location"
-                  value={challenge.location}
+                  value={
+                    typeof challenge.location === "object" && challenge.location !== null
+                      ? (challenge.locality || challenge.district || `${challenge.location.latitude || 0}, ${challenge.location.longitude || 0}`)
+                      : String(challenge.location || challenge.locality || challenge.district || "General Locality")
+                  }
                   icon={MapPin}
                 />
 
                 <InfoItem
                   label="Submitted by"
-                  value={challenge.submittedBy}
+                  value="Anonymous Citizen"
                   icon={User}
                 />
 
@@ -615,17 +620,17 @@ export default function GovernmentChallengeDetails() {
 
               <div className="mt-5 flex items-center gap-3">
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
-                  RS
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600">
+                  AC
                 </div>
 
                 <div>
                   <p className="text-sm font-bold">
-                    {challenge.submittedBy}
+                    Anonymous Citizen
                   </p>
 
                   <p className="mt-1 text-xs text-slate-400">
-                    Citizen
+                    Citizen Submitter (Identity Protected)
                   </p>
                 </div>
 
@@ -666,6 +671,8 @@ export default function GovernmentChallengeDetails() {
 
           <textarea
             placeholder="Reason for rejection..."
+            value={decisionReason}
+            onChange={(event) => setDecisionReason(event.target.value)}
             className="mt-5 min-h-28 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm outline-none focus:border-red-400 focus:bg-white"
           />
 
@@ -708,6 +715,8 @@ export default function GovernmentChallengeDetails() {
 
           <textarea
             placeholder="What information do you need?"
+            value={decisionReason}
+            onChange={(event) => setDecisionReason(event.target.value)}
             className="mt-5 min-h-28 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
           />
 

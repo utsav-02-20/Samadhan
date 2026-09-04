@@ -3,6 +3,7 @@
 import React from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import useCitizenAutoRegister from "@/hooks/useCitizen";
 
 export default function AppShell({
   children,
@@ -11,6 +12,8 @@ export default function AppShell({
   children: React.ReactNode;
   role?: string;
 }) {
+  useCitizenAutoRegister();
+
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       {/* Fixed Sidebar */}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Trophy,
@@ -16,88 +17,71 @@ import {
   AlertCircle,
   TrendingUp,
   Building2,
+  Sparkles,
 } from "lucide-react";
 
-const stats = [
-  {
-    label: "Active Projects",
-    value: "8",
-    change: "+2 this month",
-    icon: FolderKanban,
-  },
-  {
-    label: "Challenges Applied",
-    value: "14",
-    change: "+4 this month",
-    icon: Trophy,
-  },
-  {
-    label: "Team Members",
-    value: "24",
-    change: "+5 this month",
-    icon: Users,
-  },
-  {
-    label: "Submissions",
-    value: "11",
-    change: "3 under review",
-    icon: FileCheck2,
-  },
-];
+import { useEffect, useState } from "react";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import { getUniversityChallenges, getUniversityProjects, triggerAITaskAllocation } from "@/services/university.service";
 
-const projects = [
-  {
-    name: "Road Safety Analytics",
-    department: "Traffic Department",
-    progress: 74,
-    status: "IN PROGRESS",
-  },
-  {
-    name: "Community Water Monitoring",
-    department: "Water Department",
-    progress: 52,
-    status: "IN PROGRESS",
-  },
-  {
-    name: "Smart Waste Collection",
-    department: "Municipal Corporation",
-    progress: 91,
-    status: "FINAL REVIEW",
-  },
-];
-
-const activities = [
-  {
-    title: "Submission approved",
-    description:
-      "AquaTech prototype was approved by Water Department.",
-    time: "2 hours ago",
-    icon: CheckCircle2,
-  },
-  {
-    title: "New challenge available",
-    description:
-      "Smart City Traffic Optimization is now open.",
-    time: "5 hours ago",
-    icon: Trophy,
-  },
-  {
-    title: "Department message",
-    description:
-      "Traffic Department requested a project update.",
-    time: "Yesterday",
-    icon: FileCheck2,
-  },
-  {
-    title: "Milestone approaching",
-    description:
-      "Road Safety Analytics review is due in 5 days.",
-    time: "Yesterday",
-    icon: AlertCircle,
-  },
-];
+// Commented out demo data:
+// const stats = [...];
+// const projects = [...];
+// const activities = [...];
 
 export default function UniversityDashboard() {
+  const [challenges, setChallenges] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    Promise.all([getUniversityChallenges(), getUniversityProjects()])
+      .then(([chalRes, projRes]) => {
+        setChallenges((chalRes?.data || []).map((item) => ({
+          name: item.title,
+          department: item.category || item.district || "General",
+          progress: item.status === "Resolved" ? 100 : (item.status === "In Progress" ? 50 : 25),
+          status: item.status === "Resolved" ? "COMPLETED" : (item.status === "In Progress" ? "IN PROGRESS" : "OPEN"),
+        })));
+        setProjects(projRes?.data || []);
+      })
+      .catch((err) => console.error("Could not load university dashboard data:", err));
+  }, []);
+
+  const activeProjectsList = projects.length > 0 ? projects : challenges;
+
+  const activities = challenges.slice(0, 4).map((c) => ({
+    title: `New challenge: ${c.name}`,
+    description: `Category: ${c.department}`,
+    time: "Recently updated",
+    icon: Trophy,
+  }));
+
+  const dynamicStats = [
+    {
+      label: "Active Projects",
+      value: String(activeProjectsList.length),
+      change: "Live DB count",
+      icon: FolderKanban,
+    },
+    {
+      label: "Challenges Applied",
+      value: String(challenges.length),
+      change: "Live DB count",
+      icon: Trophy,
+    },
+    {
+      label: "Team Members",
+      value: "12",
+      change: "Active research lead",
+      icon: Users,
+    },
+    {
+      label: "Submissions",
+      value: String(challenges.filter(c => c.status === "COMPLETED").length),
+      change: "Completed solutions",
+      icon: FileCheck2,
+    },
+  ];
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
 
@@ -113,8 +97,14 @@ export default function UniversityDashboard() {
             href="/university/dashboard"
             className="flex items-center gap-3"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-              S
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+              <Image
+                src="/logo.png"
+                alt="Samadhan Logo"
+                width={60}
+                height={60}
+                className="h-full w-full object-cover"
+              />
             </div>
 
             <div className="hidden sm:block">
@@ -132,7 +122,7 @@ export default function UniversityDashboard() {
 
           <nav className="ml-8 hidden items-center gap-1 lg:flex">
 
-            
+
 
             <NavItem
               href="/university/challenges"
@@ -173,12 +163,14 @@ export default function UniversityDashboard() {
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
             </Link>
 
-            <Link
-              href="/university/profile"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-black text-blue-700"
-            >
-              UB
-            </Link>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+                },
+              }}
+            />
 
           </div>
 
@@ -211,7 +203,17 @@ export default function UniversityDashboard() {
 
           </div>
 
-         
+          <button
+            onClick={() => {
+              triggerAITaskAllocation()
+                .then((res) => alert(`AI Allocation Engine completed!\n${res?.message || "Task assigned successfully."}`))
+                .catch((err) => alert(`AI Allocation Error: ${err.message}`));
+            }}
+            className="flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-violet-700"
+          >
+            <Sparkles className="h-4 w-4" />
+            Run AI Task Allocation
+          </button>
 
         </section>
 
@@ -219,7 +221,7 @@ export default function UniversityDashboard() {
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-          {stats.map((stat) => {
+          {dynamicStats.map((stat) => {
 
             const Icon = stat.icon;
 
@@ -291,7 +293,7 @@ export default function UniversityDashboard() {
 
             <div className="divide-y divide-slate-100">
 
-              {projects.map((project) => (
+              {activeProjectsList.map((project) => (
 
                 <Link
                   key={project.name}
@@ -483,11 +485,10 @@ function NavItem({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition ${
-        active
+      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition ${active
           ? "bg-slate-950 text-white"
           : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-      }`}
+        }`}
     >
       <Icon className="h-3.5 w-3.5" />
       {label}

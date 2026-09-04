@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
 import { Sparkles, ArrowRight } from "lucide-react";
@@ -12,8 +13,14 @@ export default function Navbar() {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
         {/* Brand */}
         <Link href="/citizen" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0c2340] text-lg font-bold text-white shadow-md">
-            S
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+            <Image
+              src="/logo.png"
+              alt="Samadhan Logo"
+              width={60}
+              height={60}
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <div>
@@ -36,7 +43,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/citizen/submit"
+            href="/citizen/report"
             className="text-sm font-medium text-slate-600 transition hover:text-[#0c2340]"
           >
             Submit Problem

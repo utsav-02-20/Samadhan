@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import Logo from "@/components/ui/Logo";
+import { assignChallengeToDepartment, getGovernmentChallenges } from "@/services/government.service";
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,7 +23,7 @@ const challenges = [
     title: "Broken street lights in residential area",
     category: "Infrastructure",
     location: "Sector 4, Main Market Road",
-    submittedBy: "Rahul Sharma",
+    submittedBy: "Anonymous Citizen",
     priority: "HIGH",
     status: "ACCEPTED",
   },
@@ -29,7 +32,7 @@ const challenges = [
     title: "Garbage accumulation near community park",
     category: "Sanitation",
     location: "Sector 7 Community Park",
-    submittedBy: "Priya Mehta",
+    submittedBy: "Anonymous Citizen",
     priority: "MEDIUM",
     status: "ACCEPTED",
   },
@@ -38,7 +41,7 @@ const challenges = [
     title: "Water supply disruption in Sector 4",
     category: "Water Supply",
     location: "Sector 4 Residential Area",
-    submittedBy: "Amit Kumar",
+    submittedBy: "Anonymous Citizen",
     priority: "HIGH",
     status: "ACCEPTED",
   },
@@ -47,7 +50,7 @@ const challenges = [
     title: "Damaged road near university",
     category: "Roads",
     location: "University Main Gate",
-    submittedBy: "Neha Singh",
+    submittedBy: "Anonymous Citizen",
     priority: "HIGH",
     status: "ACCEPTED",
   },
@@ -93,6 +96,8 @@ const departments = [
 ];
 
 export default function AssignChallengePage() {
+  const { getToken } = useAuth();
+  const [liveChallenges, setLiveChallenges] = useState([]);
   const [selectedChallenge, setSelectedChallenge] =
     useState(null);
 
@@ -102,8 +107,19 @@ export default function AssignChallengePage() {
   const [search, setSearch] = useState("");
 
   const [success, setSuccess] = useState(false);
+  useEffect(() => {
+    getToken().then((token) => getGovernmentChallenges(token || undefined))
+      .then((res) => setLiveChallenges((res?.data || []).map((item) => ({
+        ...item,
+        id: item.id || item._id,
+        location: item.district || "",
+        submittedBy: "Government",
+        status: item.status === "OPEN" ? "SUBMITTED" : item.status,
+      }))))
+      .catch((err) => console.error("Could not load government challenges:", err));
+  }, [getToken]);
 
-  const filteredChallenges = challenges.filter((challenge) => {
+  const filteredChallenges = liveChallenges.filter((challenge) => {
     const text = [
       challenge.id,
       challenge.title,
@@ -117,12 +133,23 @@ export default function AssignChallengePage() {
     return text.includes(search.toLowerCase());
   });
 
-  function assignChallenge() {
+  async function assignChallenge() {
     if (!selectedChallenge || !selectedDepartment) {
       return;
     }
 
-    setSuccess(true);
+    try {
+      const token = await getToken();
+      await assignChallengeToDepartment({
+        challengeId: selectedChallenge.id || selectedChallenge._id,
+        departmentId: selectedDepartment.id,
+        departmentName: selectedDepartment.name,
+      }, token || undefined);
+      setSuccess(true);
+    } catch (err) {
+      alert(err?.message || "Challenge assignment failed.");
+      return;
+    }
 
     setTimeout(() => {
       setSuccess(false);
@@ -142,34 +169,23 @@ export default function AssignChallengePage() {
 
             <Link
               href="/government/dashboard"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
 
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
-              </div>
-
-              <div>
-                <p className="text-sm font-black">
-                  Samadhan
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  Government Portal
-                </p>
-              </div>
-
-            </div>
+            <Logo href="/government/dashboard" subtitle="Government Portal" size="sm" />
 
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-            GO
-          </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm",
+              },
+            }}
+          />
 
         </div>
 
@@ -568,7 +584,7 @@ export default function AssignChallengePage() {
                 }
                 className={`mt-6 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition ${
                   selectedChallenge && selectedDepartment
-                    ? "bg-slate-950 text-white hover:bg-slate-800"
+                    ? "bg-royal-gradient text-white shadow-md shadow-indigo-600/25 hover:shadow-lg hover:shadow-indigo-600/35 hover:-translate-y-0.5"
                     : "cursor-not-allowed bg-slate-100 text-slate-400"
                 }`}
               >

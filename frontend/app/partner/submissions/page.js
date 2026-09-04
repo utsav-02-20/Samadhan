@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { Upload, CheckCircle2, Clock3, FileText } from "lucide-react";
+import Logo from "@/components/ui/Logo";
+import { UserButton } from "@clerk/nextjs";
 
 const submissions = [
   {
@@ -24,33 +26,40 @@ export default function Submissions() {
   return (
     <main className="min-h-screen bg-slate-50">
 
-      <header className="border-b bg-white">
+      <header className="border-b border-indigo-100 bg-white shadow-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center px-6">
-          <Link href="/partner/dashboard" className="font-black">
-            Samadhan
-          </Link>
+          <Logo href="/partner/opportunities" subtitle="Partner Portal" size="sm" />
 
-          <nav className="ml-auto flex gap-2">
+          <nav className="ml-auto flex items-center gap-2">
             <Link
-              href="/partner/dashboard"
-              className="px-3 py-2 text-xs font-bold"
+              href="/partner/opportunities"
+              className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-600 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
-              Dashboard
+              Opportunities
             </Link>
 
             <Link
               href="/partner/collaborations"
-              className="px-3 py-2 text-xs font-bold"
+              className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-600 transition hover:bg-indigo-50 hover:text-[#401AD9]"
             >
               Collaborations
             </Link>
 
             <Link
               href="/partner/submissions"
-              className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+              className="rounded-xl bg-royal-gradient px-3.5 py-2 text-xs font-bold !text-white shadow-sm shadow-indigo-600/20"
             >
               Submissions
             </Link>
+
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9 border-2 border-indigo-200 shadow-sm ml-2",
+                },
+              }}
+            />
           </nav>
         </div>
       </header>

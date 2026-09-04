@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -17,6 +18,7 @@ import {
   Users,
 } from "lucide-react";
 
+// demo data for a project
 const project = {
   id: "PRJ-021",
   challengeId: "SAM-1021",
@@ -130,8 +132,14 @@ export default function ProjectDetailsPage() {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                S
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+                <Image
+                  src="/logo.png"
+                  alt="Samadhan Logo"
+                  width={60}
+                  height={60}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div>
@@ -292,13 +300,12 @@ export default function ProjectDetailsPage() {
                     )}
 
                     <div
-                      className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                        milestone.status === "COMPLETED"
+                      className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${milestone.status === "COMPLETED"
                           ? "bg-emerald-100"
                           : milestone.status === "IN PROGRESS"
-                          ? "bg-blue-100"
-                          : "bg-slate-100"
-                      }`}
+                            ? "bg-blue-100"
+                            : "bg-slate-100"
+                        }`}
                     >
 
                       {milestone.status === "COMPLETED" ? (
@@ -320,13 +327,12 @@ export default function ProjectDetailsPage() {
                         </h3>
 
                         <span
-                          className={`rounded-full px-2 py-1 text-[9px] font-black ${
-                            milestone.status === "COMPLETED"
+                          className={`rounded-full px-2 py-1 text-[9px] font-black ${milestone.status === "COMPLETED"
                               ? "bg-emerald-50 text-emerald-700"
                               : milestone.status === "IN PROGRESS"
-                              ? "bg-blue-50 text-blue-700"
-                              : "bg-slate-100 text-slate-500"
-                          }`}
+                                ? "bg-blue-50 text-blue-700"
+                                : "bg-slate-100 text-slate-500"
+                            }`}
                         >
                           {milestone.status}
                         </span>
