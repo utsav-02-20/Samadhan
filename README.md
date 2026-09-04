@@ -10,7 +10,7 @@
 
 | Member | Role |
 |--------|------|
-| **Utsav Kumar**[https://github.com/utsav-02-20] |
+| **[Utsav Kumar]**(https://github.com/utsav-02-20) |
 
 
 ---
