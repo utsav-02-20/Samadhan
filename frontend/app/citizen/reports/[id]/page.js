@@ -381,9 +381,16 @@ export default function ReportDetails({ params }) {
                 <div key={idx} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={imgUrl}
+                    src={
+                      imgUrl && typeof imgUrl === "string"
+                        ? (imgUrl.startsWith("/uploads/") ? `http://localhost:5000${imgUrl}` : imgUrl)
+                        : "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=1000&q=80"
+                    }
                     alt={`Evidence ${idx + 1}`}
                     className="h-48 w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=1000&q=80";
+                    }}
                   />
                 </div>
               ))}
@@ -434,22 +441,41 @@ function Info({
   icon: Icon,
   label,
   value,
+  href,
 }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  const isLocation = label === "Location" || Boolean(href);
+  const mapsUrl = href || (isLocation ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(String(value || ""))}` : null);
 
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100">
-        <Icon className="h-4 w-4 text-slate-600" />
+  const cardContent = (
+    <div className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition ${mapsUrl ? "hover:border-emerald-300 hover:bg-emerald-50/50 cursor-pointer group" : ""}`}>
+      <div className="flex items-center justify-between">
+        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${mapsUrl ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+          <Icon className="h-4 w-4" />
+        </div>
+        {mapsUrl && (
+          <span className="text-[10px] font-bold text-emerald-600 group-hover:underline">
+            Google Maps ↗
+          </span>
+        )}
       </div>
 
       <p className="mt-4 text-[10px] font-black uppercase tracking-wide text-slate-400">
         {label}
       </p>
 
-      <p className="mt-1 text-sm font-black">
+      <p className={`mt-1 text-sm font-black ${mapsUrl ? "text-slate-900 group-hover:text-emerald-700" : ""}`}>
         {value}
       </p>
-
     </div>
   );
+
+  if (mapsUrl) {
+    return (
+      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="block">
+        {cardContent}
+      </a>
+    );
+  }
+
+  return cardContent;
 }

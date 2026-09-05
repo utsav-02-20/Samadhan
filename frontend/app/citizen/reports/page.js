@@ -29,18 +29,47 @@ export default function MyReportsPage() {
   const { getToken } = useAuth();
 
   useEffect(() => {
+    const localProblems = typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("samadhan_submitted_problems") || "[]")
+      : [];
+
     if (viewMode === "PUBLIC_FEED") {
       getPublicFeed()
-        .then((res) => setReports((res?.data || []).map((item) => ({
-          ...toReportView(item),
-          submittedBy: undefined,
-        }))))
+        .then((res) => {
+          const combined = [...localProblems, ...(res?.data || [])];
+          const uniqueMap = new Map();
+          combined.forEach((item) => {
+            const id = String(item._id || item.id);
+            if (!uniqueMap.has(id)) {
+              uniqueMap.set(id, { ...toReportView(item), submittedBy: undefined });
+            }
+          });
+          setReports(Array.from(uniqueMap.values()));
+        })
         .catch((err) => console.error("Could not load public feed:", err));
     } else {
-      if (!user) return;
-      getToken().then((token) => getCitizenHistory(user.id, token || undefined))
-        .then((res) => setReports((res?.data || []).map(toReportView)))
-        .catch((err) => console.error("Could not load reports:", err));
+      const loadUserReports = async () => {
+        let dbReports = [];
+        if (user) {
+          try {
+            const token = await getToken();
+            const res = await getCitizenHistory(user.id, token || undefined);
+            dbReports = res?.data || [];
+          } catch (err) {
+            console.error("Could not load reports:", err);
+          }
+        }
+        const combined = [...localProblems, ...dbReports];
+        const uniqueMap = new Map();
+        combined.forEach((item) => {
+          const id = String(item._id || item.id);
+          if (!uniqueMap.has(id)) {
+            uniqueMap.set(id, toReportView(item));
+          }
+        });
+        setReports(Array.from(uniqueMap.values()));
+      };
+      loadUserReports();
     }
   }, [user, getToken, viewMode]);
 

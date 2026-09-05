@@ -33,6 +33,59 @@ const statusLabels = {
   ASSIGNED: "Assigned",
 };
 
+const demoChallenges = [
+  {
+    id: "SAM-1024",
+    title: "Broken street lights in residential area",
+    category: "Infrastructure",
+    submittedBy: "Anonymous Citizen",
+    department: "Public Works",
+    status: "UNDER_REVIEW",
+    date: "28 Aug 2026",
+    priority: "HIGH",
+  },
+  {
+    id: "SAM-1021",
+    title: "Garbage accumulation near community park",
+    category: "Sanitation",
+    submittedBy: "Anonymous Citizen",
+    department: "Sanitation",
+    status: "SUBMITTED",
+    date: "27 Aug 2026",
+    priority: "MEDIUM",
+  },
+  {
+    id: "SAM-1017",
+    title: "Water supply disruption in Sector 4",
+    category: "Water Supply",
+    submittedBy: "Anonymous Citizen",
+    department: "Water Department",
+    status: "ACCEPTED",
+    date: "26 Aug 2026",
+    priority: "HIGH",
+  },
+  {
+    id: "SAM-1011",
+    title: "Damaged road near university",
+    category: "Roads",
+    submittedBy: "Anonymous Citizen",
+    department: "Public Works",
+    status: "ASSIGNED",
+    date: "25 Aug 2026",
+    priority: "HIGH",
+  },
+  {
+    id: "SAM-1008",
+    title: "Open drainage near residential block",
+    category: "Drainage",
+    submittedBy: "Anonymous Citizen",
+    department: "Municipal Services",
+    status: "UNDER_REVIEW",
+    date: "24 Aug 2026",
+    priority: "MEDIUM",
+  },
+];
+
 export default function GovernmentDashboard() {
   const { getToken } = useAuth();
   const [allChallenges, setAllChallenges] = useState([]);
@@ -41,19 +94,61 @@ export default function GovernmentDashboard() {
   useEffect(() => {
     getToken().then((token) => getGovernmentChallenges(token || undefined))
       .then((res) => {
-        const rawList = res?.data || [];
-        setAllChallenges(rawList);
-        setRecentChallenges(rawList.slice(0, 5).map((item) => ({
-          ...item,
-          id: item.id || item._id,
-          title: item.title || "Civic Complaint",
-          department: item.targetDepartment || item.department || "Unassigned",
-          submittedBy: item.citizenId?.fullName || "Citizen",
-          date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "Recently",
-          status: item.status === "OPEN" ? "SUBMITTED" : (item.status === "Pending" ? "SUBMITTED" : item.status),
-        })));
+        const dbList = res?.data || [];
+        const localSaved = typeof window !== "undefined"
+          ? JSON.parse(localStorage.getItem("samadhan_submitted_problems") || "[]")
+          : [];
+
+        const combined = [...localSaved, ...dbList, ...demoChallenges];
+        const unique = [];
+        const seen = new Set();
+
+        for (const item of combined) {
+          const key = String(item.id || item._id || item.title).trim();
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push({
+              ...item,
+              id: item.id || item._id || key,
+              title: item.title || "Civic Complaint",
+              department: item.targetDepartment || item.department || "Unassigned",
+              submittedBy: item.isAnonymous ? "Anonymous Citizen" : (item.submittedBy || item.citizenId?.fullName || "Citizen User"),
+              date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : (item.date || "Recently"),
+              status: item.status === "OPEN" || item.status === "Pending" ? "SUBMITTED" : (item.status === "In Progress" ? "ASSIGNED" : item.status || "SUBMITTED"),
+            });
+          }
+        }
+
+        setAllChallenges(unique);
+        setRecentChallenges(unique.slice(0, 5));
       })
-      .catch((err) => console.error("Could not load government data:", err));
+      .catch(() => {
+        const localSaved = typeof window !== "undefined"
+          ? JSON.parse(localStorage.getItem("samadhan_submitted_problems") || "[]")
+          : [];
+        const combined = [...localSaved, ...demoChallenges];
+        const unique = [];
+        const seen = new Set();
+
+        for (const item of combined) {
+          const key = String(item.id || item._id || item.title).trim();
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push({
+              ...item,
+              id: item.id || item._id || key,
+              title: item.title || "Civic Complaint",
+              department: item.targetDepartment || item.department || "Unassigned",
+              submittedBy: item.isAnonymous ? "Anonymous Citizen" : (item.submittedBy || item.citizenId?.fullName || "Citizen User"),
+              date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : (item.date || "Recently"),
+              status: item.status === "OPEN" || item.status === "Pending" ? "SUBMITTED" : (item.status === "In Progress" ? "ASSIGNED" : item.status || "SUBMITTED"),
+            });
+          }
+        }
+
+        setAllChallenges(unique);
+        setRecentChallenges(unique.slice(0, 5));
+      });
   }, [getToken]);
 
   const totalCount = allChallenges.length;

@@ -112,6 +112,13 @@ const problemSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    // Anonymous preference
+    isAnonymous: {
+      type: Boolean,
+      default: false,
+    },
+
     assignedDepartmentId: { type: String, default: "" },
     targetDepartment: { type: String, default: "" },
     decisionReason: { type: String, default: "" },

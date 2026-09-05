@@ -66,6 +66,12 @@ export const problemSubmissionSchema = z.object({
     .default({ latitude: 0, longitude: 0 }),
 
   images: z.array(z.string()).optional(),
+
+  isAnonymous: z
+    .union([z.boolean(), z.string()])
+    .transform((val) => val === true || val === "true")
+    .optional()
+    .default(false),
 });
 
 /* -------------------------------------------------------------------------- */

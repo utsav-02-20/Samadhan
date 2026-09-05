@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import testDbConnection from "../../../config/testDb.js";
 
 const departmentSchema = new mongoose.Schema(
   {
@@ -71,4 +72,4 @@ const departmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Department", departmentSchema);
+export default testDbConnection.model("Department", departmentSchema);

@@ -57,15 +57,31 @@ export default function CitizenInboxPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("samadhan_citizen_inbox_requests");
+    let list = [];
     if (saved) {
       try {
-        setRequests(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        const combined = [...parsed, ...INITIAL_REQUESTS];
+        const unique = [];
+        const seen = new Set();
+        for (const item of combined) {
+          const key = String(item.id || item.question).trim();
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
+          }
+        }
+        list = unique;
       } catch (e) {
-        setRequests(INITIAL_REQUESTS);
+        list = INITIAL_REQUESTS;
       }
     } else {
-      setRequests(INITIAL_REQUESTS);
+      list = INITIAL_REQUESTS;
+      try {
+        localStorage.setItem("samadhan_citizen_inbox_requests", JSON.stringify(INITIAL_REQUESTS));
+      } catch (e) {}
     }
+    setRequests(list);
   }, []);
 
   const saveRequests = (updated) => {

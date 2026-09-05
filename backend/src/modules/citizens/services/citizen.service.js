@@ -109,9 +109,12 @@ export const getPublicFeed = async (filters = {}) => {
     if (filters.category) query.category = filters.category;
     if (filters.status) query.status = filters.status;
 
-    return await Problem.find(query)
-      .populate("citizenId", "fullName district")
-      .sort({ createdAt: -1 });
+    const problems = await Problem.find(query).sort({ createdAt: -1 });
+    return await Problem.populate(problems, {
+      path: "citizenId",
+      select: "fullName district",
+      match: { _id: { $type: "objectId" } },
+    }).catch(() => problems);
   } catch (err) {
     console.warn("MongoDB read skipped in getPublicFeed (offline DB connection):", err.message);
     return [

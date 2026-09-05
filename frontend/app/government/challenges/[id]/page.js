@@ -18,6 +18,8 @@ import {
   User,
   X,
   XCircle,
+  HelpCircle,
+  UserCheck,
 } from "lucide-react";
 
 const defaultChallenge = {
@@ -32,7 +34,6 @@ const defaultChallenge = {
   status: "UNDER_REVIEW",
   priority: "HIGH",
   department: "Public Works",
-  citizenContact: "rahul.sharma@example.com",
   images: [
     "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80",
   ],
@@ -86,13 +87,28 @@ export default function GovernmentChallengeDetails() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     getToken().then((token) => getGovernmentChallenges(token || undefined)).then((res) => {
-      const item = (res?.data || []).find((value) => String(value._id || value.id) === String(id));
+      const localProblems = typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("samadhan_submitted_problems") || "[]")
+        : [];
+
+      const allItems = [...localProblems, ...(res?.data || [])];
+      const item = allItems.find((value) => String(value._id || value.id) === String(id));
       const localSavedDept = typeof window !== "undefined" ? localStorage.getItem(`assigned_dept_${id}`) : null;
-      
+
       if (item) {
         const fetchedDepartment = localSavedDept || item.targetDepartment || item.assignedDepartmentId || item.department || "Unassigned";
-        const fetchedStatus = (item.status === "OPEN" ? "SUBMITTED" : item.status) || (fetchedDepartment !== "Unassigned" ? "ASSIGNED" : "SUBMITTED");
-        setChallenge((prev) => ({ ...prev, ...item, id: item._id || item.id, department: fetchedDepartment, targetDepartment: fetchedDepartment, status: fetchedStatus, submittedDate: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : prev.submittedDate, decisionReason: item.decisionReason || "" }));
+        const fetchedStatus = (item.status === "OPEN" || item.status === "Pending" ? "SUBMITTED" : item.status) || (fetchedDepartment !== "Unassigned" ? "ASSIGNED" : "SUBMITTED");
+        setChallenge((prev) => ({
+          ...prev,
+          ...item,
+          id: item._id || item.id,
+          department: fetchedDepartment,
+          targetDepartment: fetchedDepartment,
+          status: fetchedStatus,
+          submittedDate: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : (item.date || prev.submittedDate),
+          decisionReason: item.decisionReason || "",
+          images: item.images && item.images.length > 0 ? item.images : prev.images,
+        }));
         setCurrentStatus(fetchedStatus);
         if (fetchedDepartment && fetchedDepartment !== "Unassigned") {
           setSelectedDepartment(fetchedDepartment);
@@ -105,6 +121,7 @@ export default function GovernmentChallengeDetails() {
     }).catch((error) => setMessage(error.message)).finally(() => setLoading(false));
   }, [id, getToken]);
 
+  const [message, setMessage] = useState("");
   const [currentStatus, setCurrentStatus] = useState(
     challenge.status
   );
@@ -114,6 +131,24 @@ export default function GovernmentChallengeDetails() {
 
   const [note, setNote] = useState("");
   const [decisionReason, setDecisionReason] = useState("");
+
+  const [clarificationRequests, setClarificationRequests] = useState([]);
+
+  useEffect(() => {
+    try {
+      const saved = typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("samadhan_citizen_inbox_requests") || "[]")
+        : [];
+
+      const filtered = saved.filter(
+        (req) => String(req.problemId).toLowerCase() === String(id || challenge.id).toLowerCase() ||
+                 String(req.problemTitle).toLowerCase() === String(challenge.title).toLowerCase()
+      );
+      setClarificationRequests(filtered.length > 0 ? filtered : saved);
+    } catch (e) {
+      console.warn("Could not load clarification requests:", e);
+    }
+  }, [id, challenge.id, challenge.title]);
 
   const [notes, setNotes] = useState([
     {
@@ -131,8 +166,6 @@ export default function GovernmentChallengeDetails() {
 
   const [showAssignModal, setShowAssignModal] =
     useState(false);
-
-  const [message, setMessage] = useState("");
 
   async function handleStatusChange(status, reason = "") {
     try {
@@ -229,6 +262,47 @@ export default function GovernmentChallengeDetails() {
       completed: isResolved,
     },
   ];
+
+  function sendInfoRequestToCitizen() {
+    if (!decisionReason.trim()) {
+      alert("Please enter the question or information you need from the citizen.");
+      return;
+    }
+
+    const newReq = {
+      id: `req-${Date.now()}`,
+      problemId: challenge.id || id,
+      problemTitle: challenge.title || "Civic Challenge",
+      category: challenge.category || "General",
+      district: challenge.district || "General",
+      locality: challenge.locality || (typeof challenge.location === "string" ? challenge.location : "General Locality"),
+      question: decisionReason.trim(),
+      requestedBy: `${challenge.department && challenge.department !== "Unassigned" ? challenge.department : "Government Administration"} - Officer`,
+      requestedAt: new Date().toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }) + " · " + new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+      reply: "",
+      repliedAt: null,
+      status: "PENDING",
+    };
+
+    try {
+      const existing = typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("samadhan_citizen_inbox_requests") || "[]")
+        : [];
+      const filtered = existing.filter((item) => String(item.id) !== String(newReq.id));
+      localStorage.setItem("samadhan_citizen_inbox_requests", JSON.stringify([newReq, ...filtered]));
+    } catch (e) {
+      console.warn("Could not save to citizen inbox localStorage:", e);
+    }
+
+    setShowInfoModal(false);
+    handleStatusChange("NEEDS_INFO", decisionReason.trim());
+    setMessage("Clarification request sent to Citizen Inbox.");
+    setDecisionReason("");
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -415,9 +489,16 @@ export default function GovernmentChallengeDetails() {
               <div className="mt-5 overflow-hidden rounded-2xl bg-slate-100">
 
                 <img
-                  src={challenge.images[0]}
+                  src={
+                    challenge.images && challenge.images[0] && typeof challenge.images[0] === "string"
+                      ? (challenge.images[0].startsWith("/uploads/") ? `http://localhost:5000${challenge.images[0]}` : challenge.images[0])
+                      : "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=1000&q=80"
+                  }
                   alt="Challenge evidence"
                   className="h-72 w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=1000&q=80";
+                  }}
                 />
 
               </div>
@@ -573,6 +654,76 @@ export default function GovernmentChallengeDetails() {
 
             </section>
 
+            {/* Citizen Clarifications & Replies Section */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                    <MessageSquare className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-slate-900">
+                      Citizen Clarifications & Replies
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                      Questions sent to citizen and their submitted answers
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowInfoModal(true)}
+                  className="rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition"
+                >
+                  + Request Info
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                {clarificationRequests.length > 0 ? (
+                  clarificationRequests.map((req) => (
+                    <div key={req.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <HelpCircle className="h-3.5 w-3.5 text-indigo-600" />
+                          {req.requestedBy || "Government Officer"}
+                        </span>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${req.status === "REPLIED" ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : "bg-amber-100 text-amber-800 border border-amber-200"}`}>
+                          {req.status === "REPLIED" ? "✓ Citizen Replied" : "⌛ Awaiting Citizen Reply"}
+                        </span>
+                      </div>
+
+                      <p className="mt-2 text-sm font-semibold text-slate-800 bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                        ❓ Question: "{req.question}"
+                      </p>
+
+                      {req.reply ? (
+                        <div className="mt-3.5 rounded-xl bg-emerald-50/90 p-4 border border-emerald-200/80 shadow-2xs">
+                          <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
+                            <span className="flex items-center gap-1.5">
+                              <UserCheck className="h-4 w-4 text-emerald-600" /> Citizen Response:
+                            </span>
+                            <span className="text-[10px] font-normal text-emerald-700">{req.repliedAt}</span>
+                          </div>
+                          <p className="mt-2 text-sm text-emerald-950 font-bold leading-relaxed">
+                            "{req.reply}"
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-xs font-medium text-amber-700 italic">
+                          No reply submitted by citizen yet.
+                        </p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400">
+                    No clarification requests sent for this challenge yet. Click "+ Request Info" above to ask the citizen a question.
+                  </div>
+                )}
+              </div>
+            </section>
+
           </div>
 
           {/* Right sidebar */}
@@ -686,36 +837,24 @@ export default function GovernmentChallengeDetails() {
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
               <h2 className="font-black">
-                Citizen
+                Citizen Submitter
               </h2>
 
               <div className="mt-5 flex items-center gap-3">
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600">
-                  AC
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-50 font-bold text-indigo-700 border border-indigo-100">
+                  {challenge.isAnonymous || challenge.submittedBy === "Anonymous Citizen" ? "AC" : "CU"}
                 </div>
 
                 <div>
                   <p className="text-sm font-bold">
-                    Anonymous Citizen
+                    {challenge.isAnonymous || challenge.submittedBy === "Anonymous Citizen" ? "Anonymous Citizen" : (challenge.submittedBy || "Citizen User")}
                   </p>
 
-                  <p className="mt-1 text-xs text-slate-400">
-                    Citizen Submitter (Identity Protected)
+                  <p className="mt-1 text-xs font-semibold text-slate-400">
+                    {challenge.isAnonymous || challenge.submittedBy === "Anonymous Citizen" ? "Identity Protected (Anonymous)" : "Verified Citizen"}
                   </p>
                 </div>
-
-              </div>
-
-              <div className="mt-5 rounded-xl bg-slate-50 p-4">
-
-                <p className="text-xs text-slate-400">
-                  Contact
-                </p>
-
-                <p className="mt-1 break-all text-sm font-semibold">
-                  {challenge.citizenContact}
-                </p>
 
               </div>
 
@@ -801,10 +940,7 @@ export default function GovernmentChallengeDetails() {
             </button>
 
             <button
-              onClick={() => {
-                setShowInfoModal(false);
-                handleStatusChange("NEEDS_INFO");
-              }}
+              onClick={sendInfoRequestToCitizen}
               className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
             >
               Send Request
@@ -923,28 +1059,45 @@ function InfoItem({
   label,
   value,
   icon: Icon,
+  href,
 }) {
-  return (
-    <div className="rounded-xl bg-slate-50 p-4">
+  const isLocation = label === "Location" || Boolean(href);
+  const mapsUrl = href || (isLocation ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(String(value || ""))}` : null);
 
-      <p className="text-xs font-semibold text-slate-400">
-        {label}
-      </p>
-
-      <div className="mt-1 flex items-center gap-2">
-
-        {Icon && (
-          <Icon className="h-3.5 w-3.5 text-slate-400" />
-        )}
-
-        <p className="text-sm font-bold text-slate-700">
-          {value}
+  const cardContent = (
+    <div className={`rounded-xl bg-slate-50 p-4 transition ${mapsUrl ? "hover:bg-emerald-50 hover:border-emerald-200 border border-transparent cursor-pointer group shadow-xs" : ""}`}>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-slate-400">
+          {label}
         </p>
-
+        {mapsUrl && (
+          <span className="text-[10px] font-bold text-emerald-600 group-hover:underline">
+            Google Maps ↗
+          </span>
+        )}
       </div>
 
+      <div className="mt-1 flex items-center gap-2">
+        {Icon && (
+          <Icon className={`h-3.5 w-3.5 ${mapsUrl ? "text-emerald-600" : "text-slate-400"}`} />
+        )}
+
+        <p className={`text-sm font-bold ${mapsUrl ? "text-slate-900 group-hover:text-emerald-700" : "text-slate-700"}`}>
+          {value}
+        </p>
+      </div>
     </div>
   );
+
+  if (mapsUrl) {
+    return (
+      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="block">
+        {cardContent}
+      </a>
+    );
+  }
+
+  return cardContent;
 }
 
 function Modal({

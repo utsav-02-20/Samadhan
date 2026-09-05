@@ -34,9 +34,13 @@ export default function CitizenDashboard() {
         const historyRes = user ? await getCitizenHistory(user.id, token || undefined).catch(() => null) : null;
         const feedRes = await getPublicFeed().catch(() => null);
         
+        const localProblems = typeof window !== "undefined"
+          ? JSON.parse(localStorage.getItem("samadhan_submitted_problems") || "[]")
+          : [];
+
         const historyData = historyRes?.data || [];
         const feedData = feedRes?.data || [];
-        const combined = [...historyData, ...feedData];
+        const combined = [...localProblems, ...historyData, ...feedData];
 
         if (combined.length > 0) {
           const uniqueMap = new Map();
@@ -47,6 +51,8 @@ export default function CitizenDashboard() {
             }
           });
           setReports(Array.from(uniqueMap.values()));
+        } else if (localProblems.length > 0) {
+          setReports(localProblems.map(toReportView));
         }
       } catch (err) {
         console.warn("Dashboard load fallback:", err.message);

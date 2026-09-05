@@ -125,21 +125,55 @@ export default function GovernmentChallengesPage() {
   useEffect(() => {
     getGovernmentChallenges()
       .then((res) => {
-        const items = res?.data || [];
-        if (items && items.length > 0) {
-          setLiveChallenges(items.map((item) => ({
-            ...item,
-            id: item.id || item._id,
-            department: item.targetDepartment || "Unassigned",
-            date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "",
-            status: item.status === "Pending" ? "SUBMITTED" : item.status === "In Progress" ? "ASSIGNED" : item.status,
-          })));
-        } else {
-          setLiveChallenges(initialChallenges);
+        const dbItems = res?.data || [];
+        const localSaved = typeof window !== "undefined"
+          ? JSON.parse(localStorage.getItem("samadhan_submitted_problems") || "[]")
+          : [];
+
+        const combined = [...localSaved, ...dbItems, ...challenges];
+        const unique = [];
+        const seen = new Set();
+
+        for (const item of combined) {
+          const key = String(item.id || item._id || item.title).trim();
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push({
+              ...item,
+              id: item.id || item._id || key,
+              department: item.targetDepartment || item.department || "Unassigned",
+              date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : (item.date || "Just now"),
+              status: item.status === "Pending" ? "SUBMITTED" : item.status === "In Progress" ? "ASSIGNED" : item.status || "SUBMITTED",
+              submittedBy: item.isAnonymous ? "Anonymous Citizen" : (item.submittedBy || "Citizen User"),
+            });
+          }
         }
+
+        setLiveChallenges(unique);
       })
       .catch(() => {
-        setLiveChallenges(initialChallenges);
+        const localSaved = typeof window !== "undefined"
+          ? JSON.parse(localStorage.getItem("samadhan_submitted_problems") || "[]")
+          : [];
+        const combined = [...localSaved, ...challenges];
+        const unique = [];
+        const seen = new Set();
+
+        for (const item of combined) {
+          const key = String(item.id || item._id || item.title).trim();
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push({
+              ...item,
+              id: item.id || item._id || key,
+              department: item.targetDepartment || item.department || "Unassigned",
+              date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : (item.date || "Just now"),
+              status: item.status === "Pending" ? "SUBMITTED" : item.status === "In Progress" ? "ASSIGNED" : item.status || "SUBMITTED",
+              submittedBy: item.isAnonymous ? "Anonymous Citizen" : (item.submittedBy || "Citizen User"),
+            });
+          }
+        }
+        setLiveChallenges(unique);
       });
   }, []);
   const [priority, setPriority] = useState("ALL");
@@ -165,7 +199,7 @@ export default function GovernmentChallengesPage() {
 
       const matchesPriority =
         priority === "ALL" ||
-        challenge.priority === priority;
+        (challenge.priority || "HIGH") === priority;
 
       return (
         matchesSearch &&
@@ -173,7 +207,7 @@ export default function GovernmentChallengesPage() {
         matchesPriority
       );
     });
-  }, [search, status, priority]);
+  }, [liveChallenges, search, status, priority]);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
